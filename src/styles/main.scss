@@ -1,0 +1,84 @@
+@import url('https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i');
+
+// Lamden colors
+$color-azure: #3B42C7;
+$color-black: #000000;
+$color-blue: #5368E7;
+$color-maroon: #7C4970;
+$color-bossanova: #512354;
+$color-cyan: #2DDFE3;
+$color-dark-azure: #252549;
+$color-dark-blue: #140B34;
+$color-dark-cyan: #3CD4E2;
+$color-dark-pink: #CC6D99;
+$color-dark-purple: #1E0837;
+$color-dark-gray: #0B012D;
+$color-dark-violet: #2B2156;
+$color-haiti: #1A1342;
+$color-light-gray: #D7E0E4;
+$color-light-azure: #3F43C0;
+$color-light-blue: #3627A5;
+$color-light-haiti: #170F3B;
+$color-light-purple: #574690;
+$color-light-violet: #864472;
+$color-gray: #E4ECF0;
+$color-navy-blue: #251F58;
+$color-navy-haiti: #18103D;
+$color-orange: #FFBEA9;
+$color-pink: #F088AF;
+$color-purple: #351544;
+$color-quite-black: #0D1326;
+$color-violet: #391B4E;
+$color-white: #FFFFFF;
+
+$color-error: #FF0000;
+
+$color-nav: #1F163D;
+$color-nav-dropdown: #45387F;
+$color-quote: $color-blue;
+$color-table-gradient: #211A53;
+$color-table-gradient-second: #1F174A;
+
+// Text-styles
+$text-style-light: 300;
+$text-style-medium: 500;
+$text-style-bold: 600;
+$text-style-black: 900;
+
+// Grid breakpoints
+$grid-breakpoints-h: (
+  xs: 375px,
+  sm: 767.98px,
+  md: 991.98px,
+  lg: 1199.98px,
+  xl: 1360px,
+  xxl: 1600px,
+) !default;
+
+// Grid breakpoints
+$grid-breakpoints-v: (
+  xs: 500px
+) !default;
+
+
+html {
+  -ms-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: 'Nunito', sans-serif !important; 
+
+}
+
+.main-container {
+  background-color: white;
+  background-repeat: no-repeat;
+  padding: 0!important;
+}
+
+
+// Import components
