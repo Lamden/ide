@@ -1,40 +1,22 @@
-import React from "react"
-import MonacoEditor from 'react-monaco-editor';
+import React, { Component } from 'react';
 
-class MonacoWindow extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      code: '// type your code...',
+class MonacoWindow extends Component {
+    render() {
+        return (
+          <div id="monaco-container" className="monaco-window" />
+        );
     }
-  }
 
-  editorDidMount(editor, monaco) {
-    console.log('editorDidMount', editor);
-    editor.focus();
-  }
-
-  onChange(newValue, e) {
-    console.log('onChange', newValue, e);
-  }
-
-  render() {
-    const code = this.state.code;
-    const options = {
-      selectOnLineNumbers: true
-    };
-    
-    return (
-      <MonacoEditor
-        width="100%"
-        height="100vh"
-        language="javascript"
-        theme="vs-dark"
-        value={code}
-        options={options}
-      />
-    );
-  }
+    componentDidMount() {
+        import("monaco-editor").then(monaco => {       
+            monaco.editor.create(document.getElementById('monaco-container'), {
+                value: [
+                    '# This where the revolution starts...',
+                ].join('\n'),
+                language: 'python'
+            });
+        });
+    }
 }
    
   export default MonacoWindow

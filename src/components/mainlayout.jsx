@@ -1,17 +1,13 @@
 import React from "react"
 import PropTypes from "prop-types"
 
-import MainMenu from './mainmenu';
+//import MainMenu from './mainmenu';
+import PageFramework from "../components/pageframework"
 
 const MainLayout = ({ children }) => {
   return (
     <div>
-      <MainMenu />
-      <div className="main-container">
-        <main>{children}</main>
-        <footer></footer>
-      </div>
-
+      <PageFramework />
     </div>
     )
 
