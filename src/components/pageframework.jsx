@@ -122,7 +122,7 @@ class PageFramework extends React.Component {
               <MenuIcon />
             </IconButton>
             <Typography variant="h6" color="inherit" noWrap>
-              Mini variant drawer
+              Lamden
             </Typography>
           </Toolbar>
         </AppBar>
