@@ -87,13 +87,22 @@ const styles = theme => ({
 });
 
 class PageFramework extends React.Component {
-  state = {
-    open: false,
-    editorWidth: '90vw',
-    editorValue:  [ '# This is where the revolution begins... \n',
-                    '# and this \n'
-                  ].join('\n')
-  };
+  constructor(props) {
+    super(props)
+    this.state = {
+      open: false,
+      editorWidth: '90vw',
+      editorValue:  [ '# This is where the revolution begins... \n',
+                      '# and this \n'
+                    ].join('\n')
+    };
+    
+    /*
+     Bind our childHandler function to this context
+     that will get called from our Child component
+    */
+   
+}
 
   handleDrawerOpen = () => {
     this.setState({ open: true, editorWidth: '80vw' });
@@ -106,6 +115,11 @@ class PageFramework extends React.Component {
   handleSubmitClick = () =>{
     this.setState({ open: true, editorValue: 'Now this' });
   }
+
+  setNewValue = () => {
+    this.setState({ editorValue: 'Now this' });
+  }
+ 
 
   render() {
     const { classes, theme } = this.props;
@@ -156,18 +170,22 @@ class PageFramework extends React.Component {
           </div>
           <Divider />
           <List>
-            <ListItem button key='Check' onClick={this.handleSubmitClick}>
+            <ListItem button key='Check' onClick={() => this.ClickController('Check')}>
               <ListItemIcon> <CheckCircleOutline /></ListItemIcon>
               <ListItemText primary='Check' />
             </ListItem>
-            <ListItem button key='Submit'>
+            <ListItem button key='Submit' onClick={() => this.ClickController('Submit')}>
               <ListItemIcon><CloudUpload /></ListItemIcon>
-              <ListItemText primary='Submit' />
+              <ListItemText primary='Switch' />
             </ListItem>
           </List>
         </Drawer>
         <main className={classes.content}>
-            <MonacoEditor value={this.state.editorValue} width={this.state.editorWidth}/>
+            <MonacoEditor 
+              setClick={click => this.ClickController = click}
+              value={this.state.editorValue} 
+              width={this.state.editorWidth}
+              action={this.editorHandler}/>
         </main>
       </div>
     );
