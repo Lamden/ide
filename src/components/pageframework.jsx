@@ -19,7 +19,8 @@ import ListItemText from '@material-ui/core/ListItemText';
 import CloudUpload from '@material-ui/icons/CloudUpload';
 import CheckCircleOutline from '@material-ui/icons/CheckCircleOutline';
 
-import MonacoWindow from "../components/monacowindow"
+
+import MonacoEditor from "../components/monacoeditor"
 
 const drawerWidth = 240;
 
@@ -88,15 +89,23 @@ const styles = theme => ({
 class PageFramework extends React.Component {
   state = {
     open: false,
+    editorWidth: '90vw',
+    editorValue:  [ '# This is where the revolution begins... \n',
+                    '# and this \n'
+                  ].join('\n')
   };
 
   handleDrawerOpen = () => {
-    this.setState({ open: true });
+    this.setState({ open: true, editorWidth: '80vw' });
   };
 
   handleDrawerClose = () => {
-    this.setState({ open: false });
+    this.setState({ open: false, editorWidth: '90vw' });
   };
+
+  handleSubmitClick = () =>{
+    this.setState({ open: true, editorValue: 'Now this' });
+  }
 
   render() {
     const { classes, theme } = this.props;
@@ -147,18 +156,18 @@ class PageFramework extends React.Component {
           </div>
           <Divider />
           <List>
-            <ListItem button key='Check'>
+            <ListItem button key='Check' onClick={this.handleSubmitClick}>
               <ListItemIcon> <CheckCircleOutline /></ListItemIcon>
               <ListItemText primary='Check' />
             </ListItem>
             <ListItem button key='Submit'>
-              <ListItemIcon> <CloudUpload /></ListItemIcon>
+              <ListItemIcon><CloudUpload /></ListItemIcon>
               <ListItemText primary='Submit' />
             </ListItem>
           </List>
         </Drawer>
         <main className={classes.content}>
-            <MonacoWindow />
+            <MonacoEditor value={this.state.editorValue} width={this.state.editorWidth}/>
         </main>
       </div>
     );

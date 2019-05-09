@@ -1,6 +1,19 @@
 .monaco-window{
-    width: 100%; 
-    height: 100vh ; 
-    border: 1px solid #ccc;
-    margin-top: 4rem;
+    width: 90vw;
+    height: 50vh;
+    margin-top: 3rem;
+}
+
+.myInlineDecoration {
+	color: red !important;
+	cursor: pointer;
+	text-decoration: underline;
+	font-weight: bold;
+	font-style: oblique;
+}
+
+.myLineDecoration {
+	background: lightblue;
+	width: 5px !important;
+	margin-left: 3px;
 }
