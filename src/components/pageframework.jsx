@@ -137,7 +137,7 @@ class PageFramework extends React.Component {
 
   setNewValue = (contract) => {
     this.setState({
-      newContract: [contract[0]],
+      newContract: [contract],
     })
   }
 

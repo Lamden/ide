@@ -185,8 +185,9 @@ class ContractSearch extends React.Component {
         this.setState({
             [name]: value,
         }, () => {
-            this.props.selectedContract(this.state.single.value);
-            
+            if (this.state.single){
+                this.props.selectedContract(this.state.single.value)
+            }
         });
         
     };
