@@ -42,7 +42,9 @@ class MonacoWindow extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot){
-    this.props.newContract ? API.contract(this.props.newContract).then(data => this.setEditorValue(data.toString())) : null;
+    if (this.props.newContract){
+      API.contract(this.props.newContract).then(data => this.setEditorValue(data.toString()))
+    }
   }
 
   clickController = (action) =>{
