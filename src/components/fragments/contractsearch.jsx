@@ -16,46 +16,6 @@ import { emphasize } from '@material-ui/core/styles/colorManipulator';
 
 import * as API from '../../js/contracting_api.ts';
 
-const suggestions = [
-  { label: 'Afghanistan' },
-  { label: 'Aland Islands' },
-  { label: 'Albania' },
-  { label: 'Algeria' },
-  { label: 'American Samoa' },
-  { label: 'Andorra' },
-  { label: 'Angola' },
-  { label: 'Anguilla' },
-  { label: 'Antarctica' },
-  { label: 'Antigua and Barbuda' },
-  { label: 'Argentina' },
-  { label: 'Armenia' },
-  { label: 'Aruba' },
-  { label: 'Australia' },
-  { label: 'Austria' },
-  { label: 'Azerbaijan' },
-  { label: 'Bahamas' },
-  { label: 'Bahrain' },
-  { label: 'Bangladesh' },
-  { label: 'Barbados' },
-  { label: 'Belarus' },
-  { label: 'Belgium' },
-  { label: 'Belize' },
-  { label: 'Benin' },
-  { label: 'Bermuda' },
-  { label: 'Bhutan' },
-  { label: 'Bolivia, Plurinational State of' },
-  { label: 'Bonaire, Sint Eustatius and Saba' },
-  { label: 'Bosnia and Herzegovina' },
-  { label: 'Botswana' },
-  { label: 'Bouvet Island' },
-  { label: 'Brazil' },
-  { label: 'British Indian Ocean Territory' },
-  { label: 'Brunei Darussalam' },
-].map(suggestion => ({
-  value: suggestion.label,
-  label: suggestion.label,
-}));
-
 const styles = theme => ({
   root: {
     flexGrow: 1,
@@ -209,21 +169,30 @@ const components = {
 };
 
 class ContractSearch extends React.Component {
-  state = {
-    single: null,
-    multi: null,
-    contracts: ['nothing']
-  };
+    state = {
+        single: null,
+        multi: null,
+        contracts: []
+    };
 
-  handleChange = name => value => {
-    this.setState({
-      [name]: value,
-    });
-  };
+    componentDidMount() {
+        API.contracts()
+            .then(contracts => contracts.map(contract => ({label: contract, value: contract})))
+            .then(contracts => this.setState({contracts: contracts}))
+    }
 
-  getContracts = () => {
-    API.contracts().then(contracts => this.setState({contracts: contracts}));
-  }
+    handleChange = name => value => {
+        this.setState({
+        [name]: value,
+        })
+        
+    };
+
+    updateContracts = () => {
+        API.contracts()
+        .then(contracts => contracts.map(contract => ({label: contract, value: contract})))
+        .then(contracts => this.setState({contracts: contracts}))
+    }
 
   render() {
     const { classes, theme } = this.props;
@@ -237,14 +206,16 @@ class ContractSearch extends React.Component {
         },
       }),
     };
-
+    console.log(this.state.contracts)
+    console.log(this.state.single)
     return (
+        
       <div className={classes.root}>
         <NoSsr>
           <Select
             classes={classes}
             styles={selectStyles}
-            options={this.getContracts()}
+            options={this.state.contracts}
             components={components}
             value={this.state.single}
             onChange={this.handleChange('single')}
