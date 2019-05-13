@@ -111,6 +111,7 @@ class PageFramework extends React.Component {
       open: false,
       editorWidth: '90vw',
       editorValue:  [ '# This is where the revolution begins... \n', ' \n', ' \n', ' \n'].join('\n'),
+      newContract: undefined,
       windowHeight: undefined,
       windowWidth: undefined
     };
@@ -134,8 +135,10 @@ class PageFramework extends React.Component {
     this.setState({ open: true, editorValue: 'Now this' });
   }
 
-  setNewValue = () => {
-    this.setState({ editorValue: 'Now this' });
+  setNewValue = (contract) => {
+    this.setState({
+      newContract: [contract],
+    })
   }
 
   handleResize = () => this.setState({
@@ -181,7 +184,7 @@ class PageFramework extends React.Component {
               Lamden
             </Typography>
             <div className={classes.search}>
-              <ContractSearch />
+              <ContractSearch selectedContract={this.setNewValue}/>
             </div>
           </Toolbar>
         </AppBar>
@@ -236,6 +239,7 @@ class PageFramework extends React.Component {
             <MonacoEditor 
               setClick={click => this.ClickController = click}
               value={this.state.editorValue}
+              newContract={this.state.newContract}
               width={this.state.open ? this.state.windowWidth - drawerWidth : this.state.windowWidth}
               height={this.state.windowHeight}
               drawerOpen = {this.state.open}

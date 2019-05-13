@@ -183,8 +183,11 @@ class ContractSearch extends React.Component {
 
     handleChange = name => value => {
         this.setState({
-        [name]: value,
-        })
+            [name]: value,
+        }, () => {
+            this.props.selectedContract(this.state.single.value);
+            
+        });
         
     };
 
@@ -206,8 +209,7 @@ class ContractSearch extends React.Component {
         },
       }),
     };
-    console.log(this.state.contracts)
-    console.log(this.state.single)
+
     return (
         
       <div className={classes.root}>
