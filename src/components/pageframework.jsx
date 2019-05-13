@@ -18,9 +18,11 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import CloudUpload from '@material-ui/icons/CloudUpload';
 import CheckCircleOutline from '@material-ui/icons/CheckCircleOutline';
+import { fade } from '@material-ui/core/styles/colorManipulator';
 
 
 import MonacoEditor from "../components/monacoeditor"
+import ContractSearch from "../components/fragments/contractsearch"
 
 
 const drawerWidth = 240;
@@ -47,6 +49,21 @@ const styles = theme => ({
   menuButton: {
     marginLeft: 12,
     marginRight: 36,
+  },
+  search: {
+    position: 'relative',
+    borderRadius: theme.shape.borderRadius,
+    backgroundColor: fade(theme.palette.common.white, 0.15),
+    '&:hover': {
+      backgroundColor: fade(theme.palette.common.white, 0.25),
+    },
+    marginRight: theme.spacing.unit * 5,
+    marginLeft: 0,
+    width: '120%',
+    [theme.breakpoints.up('sm')]: {
+      marginLeft: theme.spacing.unit * 3,
+      width: 'auto',
+    },
   },
   hide: {
     display: 'none',
@@ -163,6 +180,9 @@ class PageFramework extends React.Component {
             <Typography variant="h6" color="inherit" noWrap>
               Lamden
             </Typography>
+            <div className={classes.search}>
+              <ContractSearch />
+            </div>
           </Toolbar>
         </AppBar>
         <Drawer
