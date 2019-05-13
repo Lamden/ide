@@ -213,25 +213,9 @@ class PageFramework extends React.Component {
               <ListItemIcon> <CheckCircleOutline /></ListItemIcon>
               <ListItemText primary='CheckAPI' />
             </ListItem>
-            <ListItem button key='Contracts' onClick={() => this.ClickController('Contracts')}>
-              <ListItemIcon><CloudUpload /></ListItemIcon>
-              <ListItemText primary='Contracts' />
-            </ListItem>
-            <ListItem button key='Contract' onClick={() => this.ClickController('Contract')}>
-              <ListItemIcon><CloudUpload /></ListItemIcon>
-              <ListItemText primary='Contract' />
-            </ListItem>
             <ListItem button key='Lint' onClick={() => this.ClickController('Lint')}>
               <ListItemIcon><CloudUpload /></ListItemIcon>
               <ListItemText primary='Lint' />
-            </ListItem>
-            <ListItem button key='AddDecoration' onClick={() => this.ClickController('AddDecoration')}>
-              <ListItemIcon><CloudUpload /></ListItemIcon>
-              <ListItemText primary='Add Decoration' />
-            </ListItem>
-            <ListItem button key='DelDecoration' onClick={() => this.ClickController('DelDecoration')}>
-              <ListItemIcon><CloudUpload /></ListItemIcon>
-              <ListItemText primary='Del Decorations' />
             </ListItem>
           </List>
         </Drawer>
