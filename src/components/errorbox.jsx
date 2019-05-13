@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Divider from '@material-ui/core/Divider';
 
 class ErrorBox extends Component {
 
@@ -27,16 +28,25 @@ class ErrorBox extends Component {
         const errors = this.sortedErrors();
         return (
             <div style={{
-                width: this.props.width, 
-                height: this.props.height}} 
+                    width: this.props.width ? this.props.width : '500px', 
+                    height: this.props.height
+                }}
                 className="errorbox-container">
-
-                <ul>
+                <div className="heading">{'Error Console'}</div>
                     {errors ? 
-                        errors.map((error, i) => { return <li className="errorLine" key={i} >{error}</li> })
+                        errors.map((error, i) => { 
+                            return (
+                                <div>
+                                <div key={i} className="errorLine">
+                                    <span className="number">{(i+ 1) + ' - '}</span>
+                                    <span className="message">{error}</span>
+                                    
+                                </div>
+                                <Divider variant="middle"/>
+                                </div>
+                            ) })
                     : null
                     }
-                </ul>
             </div>
         );
     }

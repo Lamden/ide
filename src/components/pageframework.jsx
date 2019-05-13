@@ -149,7 +149,7 @@ class PageFramework extends React.Component {
             [classes.appBarShift]: this.state.open
           })}
         >
-          <Toolbar disableGutters={!this.state.open} style={{'background-color': '#512354'}}>
+          <Toolbar disableGutters={!this.state.open} style={{'backgroundColor': '#512354'}}>
             <IconButton
               color="inherit"
               aria-label="Open drawer"
@@ -217,8 +217,8 @@ class PageFramework extends React.Component {
               setClick={click => this.ClickController = click}
               value={this.state.editorValue}
               width={this.state.open ? this.state.windowWidth - drawerWidth : this.state.windowWidth}
-              drawerOpen = {this.state.open}
               height={this.state.windowHeight}
+              drawerOpen = {this.state.open}
               action={this.editorHandler}/>
         </main>
       </div>

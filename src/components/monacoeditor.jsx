@@ -9,8 +9,8 @@ const appBarHeight = 100;
 const EditorContainer = (props) => {
   return <div
           style={{
-            width: props.width, 
-            height: props.height - (errorBoxHeight + appBarHeight), 
+            width: props.width ? props.width : '500px', 
+            height: props.height ? props.height - (errorBoxHeight + appBarHeight) : '500px' , 
             margin: '5rem 0 0'}}
           id="editor-container"></div>
 };
