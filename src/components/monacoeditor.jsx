@@ -1,13 +1,28 @@
 import React, { Component } from 'react';
 
-const PORT = '8080'
-const API = 'http://localhost:' + PORT;
+import * as API from '../js/contracting_api.ts';
+import ErrorBox from "../components/errorbox"
+
+const errorBoxHeight = 200;
+const appBarHeight = 100;
+
+const EditorContainer = (props) => {
+  return <div
+          style={{
+            width: props.width, 
+            height: props.height - (errorBoxHeight + appBarHeight), 
+            margin: '5rem 0 0'}}
+          id="editor-container"></div>
+};
 
 
 class MonacoWindow extends Component {
   constructor(props) { 
-      super(props); 
+      super(props);
       this.clickController = this.clickController.bind(this);
+      this.state = {
+        errors: ''
+      }
       this.editor = null; 
       this.monaco = null;
   }
@@ -16,58 +31,51 @@ class MonacoWindow extends Component {
     import("monaco-editor")
       .then( monaco => {
         this.monaco = monaco;
-        this.editor = this.monaco.editor.create(document.getElementById("container"), {
+        this.editor = this.monaco.editor.create(document.getElementById("editor-container"), {
           value: this.props.value,
-          language: "python"
+          language: "python",
+          automaticLayout: true
+
         });
         this.props.setClick(this.clickController);
       })
   }
 
-  testAPI1 = () => {
-    const ENDPOINT = '/';
-    fetch(API + ENDPOINT)
-    .then(response => response.text())
-    .then(data => this.setValue(data));
-  }
-
-  testAPI2 = () => {
-    const ENDPOINT = '/contracts';
-    fetch(API + ENDPOINT)
-    .then(response => response.json())
-    .then(data => console.log(data));
-  }
-
-  componentWillUnmount() {
-    this.props.onRef(undefined)
-  }
-
-  getCurrentValue = () =>{
-    return this.editor.getValue();
-  }
-
-  setValue = (value) =>{
-    return this.editor.setValue(value);
-  }
-
   clickController = (action) =>{
     switch(action) {
-      case "Check":
-        console.log("Checking code");
-        this.testAPI1();
+      case "CheckAPI":
+        API.sanitycheck().then(data => this.setEditorValue(data))
         break;
-      case "Submit":
-        console.log("Submitting code");
-        this.testAPI2();
+      case "Contracts":
+        API.contracts().then(data => this.setEditorValue(data.toString()));
         break;
+      case "Contract":
+        API.contract('submission').then(data => this.setEditorValue(data.toString()));
+        break;
+      case "Lint":
+        API.lint('testName', this.getEditorValue()).then(data => this.handleErrors(JSON.parse(data.toString())));
+        break;
+      case "AddDecoration":
+        this.addDecoration();
+      break;
+      case "DelDecoration":
+        this.delDecoration();
+      break;
       default:
         break;
     }
-
   }
 
-  setNewValue = (value) =>{
-    this.editor.setValue(value);
+  getEditorValue = () =>{
+    return this.editor.getValue();
+  }
+
+  setEditorValue = (value) =>{
+    return this.editor.setValue(value);
+  }
+
+  handleErrors = (errors) => {
+    this.setState({ errors });
   }
 
   addDecoration = () => {
@@ -77,16 +85,18 @@ class MonacoWindow extends Component {
     ]);
   }
 
+  delDecoration = () => {
+    this.editor.deltaDecorations([], []);
+  }
 
   render() {
       return (
         <div>
-          <div id="container" className="monaco-window" />
+            <EditorContainer width={this.props.width} height={this.props.height} className="monaco-window" />
+            <ErrorBox width={this.props.drawerOpen ? this.props.width : this.props.width - 73} height={errorBoxHeight} errors={this.state.errors} />
         </div>
       );
   }
-
-
 }
    
-export default MonacoWindow
+export default MonacoWindow;

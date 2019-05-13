@@ -57,7 +57,9 @@ $grid-breakpoints-h: (
 
 // Grid breakpoints
 $grid-breakpoints-v: (
-  xs: 500px
+  sm: 300px,
+  md: 500px,
+  lg: 750px
 ) !default;
 
 
@@ -80,6 +82,11 @@ body {
   padding: 0!important;
 }
 
+.MuiAppBar{
+  background-color: white!important;
+}
+
 
 // Import components
 @import "./components/_monacowindow.scss";
+@import "./components/_errorbox.scss";

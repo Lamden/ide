@@ -22,6 +22,7 @@ import CheckCircleOutline from '@material-ui/icons/CheckCircleOutline';
 
 import MonacoEditor from "../components/monacoeditor"
 
+
 const drawerWidth = 240;
 
 const styles = theme => ({
@@ -32,7 +33,7 @@ const styles = theme => ({
     zIndex: theme.zIndex.drawer + 1,
     transition: theme.transitions.create(['width', 'margin'], {
       easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
+      duration: theme.transitions.duration.leavingScreen
     }),
   },
   appBarShift: {
@@ -82,7 +83,7 @@ const styles = theme => ({
   },
   content: {
     flexGrow: 1,
-    padding: theme.spacing.unit * 3,
+   // padding: theme.spacing.unit * 3,
   },
 });
 
@@ -92,9 +93,9 @@ class PageFramework extends React.Component {
     this.state = {
       open: false,
       editorWidth: '90vw',
-      editorValue:  [ '# This is where the revolution begins... \n',
-                      '# and this \n'
-                    ].join('\n')
+      editorValue:  [ '# This is where the revolution begins... \n', ' \n', ' \n', ' \n'].join('\n'),
+      windowHeight: undefined,
+      windowWidth: undefined
     };
     
     /*
@@ -119,6 +120,20 @@ class PageFramework extends React.Component {
   setNewValue = () => {
     this.setState({ editorValue: 'Now this' });
   }
+
+  handleResize = () => this.setState({
+    windowHeight: window.innerHeight,
+    windowWidth: window.innerWidth
+  });
+
+  componentDidMount() {
+    this.handleResize();
+    window.addEventListener('resize', this.handleResize)
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.handleResize)
+  }
  
 
   render() {
@@ -129,11 +144,12 @@ class PageFramework extends React.Component {
         <CssBaseline />
         <AppBar
           position="fixed"
+          
           className={classNames(classes.appBar, {
-            [classes.appBarShift]: this.state.open,
+            [classes.appBarShift]: this.state.open
           })}
         >
-          <Toolbar disableGutters={!this.state.open}>
+          <Toolbar disableGutters={!this.state.open} style={{'background-color': '#512354'}}>
             <IconButton
               color="inherit"
               aria-label="Open drawer"
@@ -170,21 +186,39 @@ class PageFramework extends React.Component {
           </div>
           <Divider />
           <List>
-            <ListItem button key='Check' onClick={() => this.ClickController('Check')}>
+            <ListItem button key='CheckAPI' onClick={() => this.ClickController('CheckAPI')}>
               <ListItemIcon> <CheckCircleOutline /></ListItemIcon>
-              <ListItemText primary='Check' />
+              <ListItemText primary='CheckAPI' />
             </ListItem>
-            <ListItem button key='Submit' onClick={() => this.ClickController('Submit')}>
+            <ListItem button key='Contracts' onClick={() => this.ClickController('Contracts')}>
               <ListItemIcon><CloudUpload /></ListItemIcon>
-              <ListItemText primary='Switch' />
+              <ListItemText primary='Contracts' />
+            </ListItem>
+            <ListItem button key='Contract' onClick={() => this.ClickController('Contract')}>
+              <ListItemIcon><CloudUpload /></ListItemIcon>
+              <ListItemText primary='Contract' />
+            </ListItem>
+            <ListItem button key='Lint' onClick={() => this.ClickController('Lint')}>
+              <ListItemIcon><CloudUpload /></ListItemIcon>
+              <ListItemText primary='Lint' />
+            </ListItem>
+            <ListItem button key='AddDecoration' onClick={() => this.ClickController('AddDecoration')}>
+              <ListItemIcon><CloudUpload /></ListItemIcon>
+              <ListItemText primary='Add Decoration' />
+            </ListItem>
+            <ListItem button key='DelDecoration' onClick={() => this.ClickController('DelDecoration')}>
+              <ListItemIcon><CloudUpload /></ListItemIcon>
+              <ListItemText primary='Del Decorations' />
             </ListItem>
           </List>
         </Drawer>
         <main className={classes.content}>
             <MonacoEditor 
               setClick={click => this.ClickController = click}
-              value={this.state.editorValue} 
-              width={this.state.editorWidth}
+              value={this.state.editorValue}
+              width={this.state.open ? this.state.windowWidth - drawerWidth : this.state.windowWidth}
+              drawerOpen = {this.state.open}
+              height={this.state.windowHeight}
               action={this.editorHandler}/>
         </main>
       </div>
