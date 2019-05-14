@@ -73,7 +73,7 @@ class ErrorBox extends Component {
 
                 <div className={classNames(classes.heading, { 
                                             [classes.headingChecking]: (errors.length == 0),
-                                            [classes.headingPass]: (errors.length === 1 && errors[0] === 'ok'),
+                                            [classes.headingPass]: (errors.length === 1 && (errors[0] === 'ok' || errors[0] === 'success!')),
                                             [classes.headingErrors]: (errors.length > 0) })}>
                     {'Console: '}
                 </div>
@@ -84,7 +84,7 @@ class ErrorBox extends Component {
                             <div key={i}>
                                 <div className={classNames(classes.errorLine)}>
                                     <span className={classNames(classes.number)}>{(i+ 1) + ' - '}</span>
-                                    <span className={classNames({}, {[classes.textNormal]: errors.length === 1 && errors[0] === 'ok'})}>{error}</span>
+                                    <span className={classNames({}, {[classes.textNormal]: errors.length === 1 && (errors[0] === 'ok' || errors[0] === 'success!')})}>{error}</span>
                                 </div>
                                 <Divider variant="middle"/>
                             </div>

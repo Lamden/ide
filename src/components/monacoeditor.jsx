@@ -100,8 +100,6 @@ class MonacoWindow extends Component {
   }
 
   handleErrors = (errors) => {
-    
-    console.log(errors);
     if (errors === 'null'){
       this.setState({ errors: ['ok'] });
       this.props.enqueueSnackbar('Contract has 0 Errors!', { variant: 'success' });

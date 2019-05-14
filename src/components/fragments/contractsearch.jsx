@@ -182,7 +182,6 @@ class ContractSearch extends React.Component {
     }
 
     handleChange = name => value => {
-        console.log(value)
         this.setState({
             [name]: value,
         }, () => {
