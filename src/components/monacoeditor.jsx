@@ -1,4 +1,8 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import classNames from 'classnames';
+import { withStyles } from '@material-ui/core/styles';
+import { withSnackbar } from 'notistack';
 
 import * as API from '../js/contracting_api.ts';
 import ErrorBox from "../components/errorbox"
@@ -14,6 +18,12 @@ const EditorContainer = (props) => {
             margin: '5rem 0 0'}}
           id="editor-container"></div>
 };
+
+const styles = theme => ({
+  root: {
+    display: 'flex',
+  }
+});
 
 
 class MonacoWindow extends Component {
@@ -42,13 +52,11 @@ class MonacoWindow extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot){
-    console.log(this.props.ApiInfo)
    // console.log(prevProps.newContract)
    // console.log(this.props.newContract)
    // console.log(this.props.newContract === prevProps.newContract)
-    if (this.props.newContract && this.props.newContract != prevProps.newContract){
+    if (this.props.newContract && this.props.newContract !== prevProps.newContract){
     //  console.log(this.props.newContract[0]);
-      console.log(this.props.ApiInfo)
       API.contract(this.props.ApiInfo, this.props.newContract[0]).then(data => this.setEditorValue(data.toString()));
     }
   }
@@ -65,7 +73,12 @@ class MonacoWindow extends Component {
         API.contract('submission').then(data => this.setEditorValue(data.toString()));
         break;
       case "Lint":
-        API.lint('testName', this.getEditorValue()).then(data => this.handleErrors(JSON.parse(data.toString())));
+        this.props.enqueueSnackbar('Checking contract for errors...', { variant: 'info' });
+        API.lint(this.props.ApiInfo, 'testName', this.getEditorValue()).then(data => this.handleErrors(data));
+        break;
+      case "Submit":
+        this.props.enqueueSnackbar('Attempting to submit contract...', { variant: 'info' });
+        API.submit_contract(this.props.ApiInfo, 'testName', this.getEditorValue()).then(data => this.handleErrors(data));
         break;
       case "AddDecoration":
         this.addDecoration();
@@ -87,7 +100,27 @@ class MonacoWindow extends Component {
   }
 
   handleErrors = (errors) => {
-    this.setState({ errors });
+    
+    console.log(errors);
+    if (errors === 'null'){
+      this.setState({ errors: ['ok'] });
+      this.props.enqueueSnackbar('Contract has 0 Errors!', { variant: 'success' });
+      return
+    }
+
+    if (errors === 'success!'){
+      this.setState({ errors: ['success!'] });
+      this.props.enqueueSnackbar('Contact Submitted!', { variant: 'success' });
+      return
+    }
+
+    if (JSON.parse(errors).error === undefined){
+      this.setState({ errors: JSON.parse(errors.toString()) });
+      this.props.enqueueSnackbar('Errors Found!', { variant: 'error' });
+    }else {
+      this.setState({ errors: [JSON.parse(errors).error]});
+      this.props.enqueueSnackbar('Errors Found!', { variant: 'error' });
+    }
   }
 
   addDecoration = () => {
@@ -102,6 +135,7 @@ class MonacoWindow extends Component {
   }
 
   render() {
+    const { classes, theme } = this.props
       return (
         <div>
             <EditorContainer width={this.props.width} height={this.props.height} className="monaco-window" />
@@ -110,5 +144,10 @@ class MonacoWindow extends Component {
       );
   }
 }
-   
-export default MonacoWindow;
+
+MonacoWindow.propTypes = {
+  classes: PropTypes.object.isRequired,
+  theme: PropTypes.object.isRequired,
+};
+
+export default withStyles(styles, { withTheme: true })(withSnackbar(MonacoWindow));

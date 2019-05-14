@@ -1,9 +1,9 @@
 {
-  "name": "gatsby-starter-default",
+  "name": "lamden-web-ide",
   "private": true,
-  "description": "A simple starter to get up and developing quickly with Gatsby",
+  "description": "Lamden Contracting IDE for checking and submitting smart contract to the Lamden Blockchain",
   "version": "0.1.0",
-  "author": "Kyle Mathews <mathews.kyle@gmail.com>",
+  "author": "Jeff Scott <jeffscott@outlook.com>",
   "dependencies": {
     "@material-ui/core": "^3.9.3",
     "@material-ui/icons": "^3.0.2",
@@ -18,6 +18,7 @@
     "gatsby-transformer-sharp": "^2.1.19",
     "monaco-editor-webpack-plugin": "^1.7.0",
     "node-sass": "^4.12.0",
+    "notistack": "^0.8.2",
     "prop-types": "^15.7.2",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",

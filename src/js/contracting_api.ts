@@ -21,7 +21,6 @@ export function contracts(apiInfo){
 
 export function contract(apiInfo, contract){
     const ENDPOINT = '/contracts/';
-    console.log(apiURL(apiInfo, ENDPOINT)+ contract)
     return new Promise (function(resolve, reject){
         fetch(apiURL(apiInfo, ENDPOINT) + contract)
         .then(response => resolve (response.text()))
@@ -38,6 +37,18 @@ export function lint(apiInfo, name, code){
         .then(response => resolve (response.text()))
     });
 }
+
+export function submit_contract(apiInfo, name, code){
+    const ENDPOINT = '/submit';
+    return new Promise (function(resolve, reject){
+        fetch(apiURL(apiInfo, ENDPOINT), {
+            method: 'post',
+            body: JSON.stringify({name, code})
+        })
+        .then(response => resolve (response.text()))
+    });
+}
+
 
 
 

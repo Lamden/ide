@@ -182,6 +182,7 @@ class ContractSearch extends React.Component {
     }
 
     handleChange = name => value => {
+        console.log(value)
         this.setState({
             [name]: value,
         }, () => {
@@ -191,6 +192,7 @@ class ContractSearch extends React.Component {
         });
         
     };
+
 
     updateContracts = () => {
         API.contracts(this.props.ApiInfo)
@@ -216,6 +218,7 @@ class ContractSearch extends React.Component {
       <div className={classes.root}>
         <NoSsr>
           <Select
+            onSubmit={this.handleChange('single')}
             classes={classes}
             styles={selectStyles}
             options={this.state.contracts}

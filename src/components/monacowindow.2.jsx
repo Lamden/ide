@@ -31,12 +31,12 @@ class MonacoWindow extends Component {
   }
 
   editorDidMount(editor, monaco) {
-    console.log('editorDidMount', editor);
     editor.focus();
   }
   onChange(newValue, e) {
     console.log('onChange', newValue, e);
   }
+  
   render() {
  //   const code = this.props.value + ' ' + this.state.pageWidth;
   //  const width = this.state.pageWidth - 150;

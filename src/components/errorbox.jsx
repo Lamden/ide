@@ -1,5 +1,42 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import classNames from 'classnames';
+import { withStyles } from '@material-ui/core/styles';
+
 import Divider from '@material-ui/core/Divider';
+
+const styles = theme => ({
+    root: {
+        color: 'red',
+        border: '2px solid lightgrey',
+        backgroundColor: '#E4ECF0',
+    },
+    heading: {
+        padding: '5px',
+        color: '#18103D',
+    },
+    headingErrors: {
+        backgroundColor: '#ff6161'
+    },
+    headingChecking: {
+        backgroundColor: '#ffbb61'
+    },
+    headingPass: {
+        backgroundColor: '#86e686'
+    },
+    errorLine: {
+        '&:hover' : {
+            backgroundColor: '#574690',
+            color: 'black',
+        }
+    },
+    number: {
+        color: 'black'
+    },
+    textNormal:{
+        color: 'black'
+    }
+});
 
 class ErrorBox extends Component {
 
@@ -18,38 +55,50 @@ class ErrorBox extends Component {
                 let returnObj = errors.sort( compare );
                 return returnObj;
             } catch (e) {
-                return e.message;
+                return [e.message];
             }
-        } 
-        return null;
+        }
+        return ['ok']
     }
 
     render() {
+        const { classes, theme } = this.props
         const errors = this.sortedErrors();
         return (
             <div style={{
                     width: this.props.width ? this.props.width : '500px', 
                     height: this.props.height
                 }}
-                className="errorbox-container">
-                <div className="heading">{'Error Console'}</div>
-                    {errors ? 
-                        errors.map((error, i) => { 
-                            return (
-                                <div>
-                                <div key={i} className="errorLine">
-                                    <span className="number">{(i+ 1) + ' - '}</span>
-                                    <span className="message">{error}</span>
-                                    
+                className={classNames(classes.root)}>
+
+                <div className={classNames(classes.heading, { 
+                                            [classes.headingChecking]: (errors.length == 0),
+                                            [classes.headingPass]: (errors.length === 1 && errors[0] === 'ok'),
+                                            [classes.headingErrors]: (errors.length > 0) })}>
+                    {'Console: '}
+                </div>
+
+                {errors ? 
+                    errors.map((error, i) => { 
+                        return (
+                            <div key={i}>
+                                <div className={classNames(classes.errorLine)}>
+                                    <span className={classNames(classes.number)}>{(i+ 1) + ' - '}</span>
+                                    <span className={classNames({}, {[classes.textNormal]: errors.length === 1 && errors[0] === 'ok'})}>{error}</span>
                                 </div>
                                 <Divider variant="middle"/>
-                                </div>
-                            ) })
-                    : null
-                    }
+                            </div>
+                        ) })
+                : null
+                }
             </div>
         );
     }
 }
+
+ErrorBox.propTypes = {
+    classes: PropTypes.object.isRequired,
+    theme: PropTypes.object.isRequired,
+  };
    
-export default ErrorBox
+export default withStyles(styles, { withTheme: true })(ErrorBox);

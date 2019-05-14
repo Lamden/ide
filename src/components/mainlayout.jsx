@@ -3,14 +3,16 @@ import PropTypes from "prop-types"
 
 //import MainMenu from './mainmenu';
 import PageFramework from "../components/pageframework"
+import { SnackbarProvider, withSnackbar} from 'notistack';
+
+
 
 const MainLayout = ({ children }) => {
   return (
-    <div>
+    <SnackbarProvider>
       <PageFramework />
-    </div>
+    </SnackbarProvider>
     )
-
 }
 
 
@@ -18,4 +20,4 @@ MainLayout.propTypes = {
   children: PropTypes.node.isRequired,
 }
 
-export default MainLayout
+export default MainLayout;

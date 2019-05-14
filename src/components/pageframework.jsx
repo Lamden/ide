@@ -17,7 +17,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import FiberManualRecord from '@material-ui/icons/FiberManualRecord';
-import CloudUpload from '@material-ui/icons/CloudUpload';
+import Publish from '@material-ui/icons/Publish';
 import CheckCircleOutline from '@material-ui/icons/CheckCircleOutline';
 import { fade } from '@material-ui/core/styles/colorManipulator';
 
@@ -226,7 +226,6 @@ class PageFramework extends React.Component {
             <div className={classes.search}>
               <ContractSearch ApiInfo={this.state.ApiInfo} selectedContract={this.setNewValue}/>
             </div>
-            {this.state.ApiInfo.server}
           </Toolbar>
         </AppBar>
         <Drawer
@@ -263,8 +262,12 @@ class PageFramework extends React.Component {
               <ListItemText primary={'API ' + this.state.ApiInfo.status} />
             </ListItem>
             <ListItem button key='Lint' onClick={() => this.ClickController('Lint')}>
-              <ListItemIcon><CloudUpload /></ListItemIcon>
-              <ListItemText primary='Lint' />
+              <ListItemIcon><CheckCircleOutline /></ListItemIcon>
+              <ListItemText primary='Error Check' />
+            </ListItem>
+            <ListItem button key='Submit' onClick={() => this.ClickController('Submit')}>
+              <ListItemIcon><Publish /></ListItemIcon>
+              <ListItemText primary='Submit' />
             </ListItem>
           </List>
         </Drawer>
