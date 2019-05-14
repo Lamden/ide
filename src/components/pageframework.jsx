@@ -250,7 +250,7 @@ class PageFramework extends React.Component {
           </div>
           <Divider />
           <List>
-            <ListItem key='apistatus' title={'API Connection ' + this.state.apiStatus}>
+            <ListItem key='apistatus' title={'API Connection ' + this.state.ApiInfo.status}>
               <ListItemIcon> 
                 <FiberManualRecord className={classNames({
                                                           [classes.statusOnline]: this.state.ApiInfo.status === 'Online',
