@@ -260,7 +260,7 @@ class PageFramework extends React.Component {
                 />
 
               </ListItemIcon>
-              <ListItemText primary={this.state.apiStatus} />
+              <ListItemText primary={'API ' + this.state.ApiInfo.status} />
             </ListItem>
             <ListItem button key='Lint' onClick={() => this.ClickController('Lint')}>
               <ListItemIcon><CloudUpload /></ListItemIcon>
