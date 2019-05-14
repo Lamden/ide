@@ -1,34 +1,37 @@
-const PORT = '8080'
-const API = 'http://localhost:' + PORT;
 
-export function sanitycheck(){
+function apiURL (apiInfo, ENDPOINT){
+    if (apiInfo) { return apiInfo.server + ':' + apiInfo.port + ENDPOINT;}     
+}
+
+export function apicheck(apiInfo){
     const ENDPOINT = '/';
     return new Promise (function(resolve, reject){
-        fetch(API + ENDPOINT)
+        fetch(apiURL(apiInfo, ENDPOINT))
         .then(response => resolve (response.text()))
     });
 }
 
-export function contracts(){
+export function contracts(apiInfo){
     const ENDPOINT = '/contracts';
     return new Promise (function(resolve, reject){
-        fetch(API + ENDPOINT)
+        fetch(apiURL(apiInfo, ENDPOINT))
         .then(response => resolve (response.json()))
     });
 }
 
-export function contract(contract){
+export function contract(apiInfo, contract){
     const ENDPOINT = '/contracts/';
+    console.log(apiURL(apiInfo, ENDPOINT)+ contract)
     return new Promise (function(resolve, reject){
-        fetch(API + ENDPOINT + contract)
+        fetch(apiURL(apiInfo, ENDPOINT) + contract)
         .then(response => resolve (response.text()))
     });
 }
 
-export function lint(name, code){
+export function lint(apiInfo, name, code){
     const ENDPOINT = '/lint';
     return new Promise (function(resolve, reject){
-        fetch(API + ENDPOINT, {
+        fetch(apiURL(apiInfo, ENDPOINT), {
             method: 'post',
             body: JSON.stringify({name, code})
         })

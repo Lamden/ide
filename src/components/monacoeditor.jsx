@@ -42,19 +42,21 @@ class MonacoWindow extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot){
-    console.log(prevProps.newContract)
-    console.log(this.props.newContract)
-    console.log(this.props.newContract === prevProps.newContract)
+    console.log(this.props.ApiInfo)
+   // console.log(prevProps.newContract)
+   // console.log(this.props.newContract)
+   // console.log(this.props.newContract === prevProps.newContract)
     if (this.props.newContract && this.props.newContract != prevProps.newContract){
-      console.log(this.props.newContract[0]);
-      API.contract(this.props.newContract[0]).then(data => this.setEditorValue(data.toString()));
+    //  console.log(this.props.newContract[0]);
+      console.log(this.props.ApiInfo)
+      API.contract(this.props.ApiInfo, this.props.newContract[0]).then(data => this.setEditorValue(data.toString()));
     }
   }
 
   clickController = (action) =>{
     switch(action) {
       case "CheckAPI":
-        API.sanitycheck().then(data => this.setEditorValue(data))
+        API.apicheck().then(data => this.setEditorValue(data))
         break;
       case "Contracts":
         API.contracts().then(data => this.setEditorValue(data.toString()));

@@ -176,7 +176,7 @@ class ContractSearch extends React.Component {
     };
 
     componentDidMount() {
-        API.contracts()
+        API.contracts(this.props.ApiInfo)
             .then(contracts => contracts.map(contract => ({label: contract, value: contract})))
             .then(contracts => this.setState({contracts: contracts}))
     }
@@ -193,7 +193,7 @@ class ContractSearch extends React.Component {
     };
 
     updateContracts = () => {
-        API.contracts()
+        API.contracts(this.props.ApiInfo)
         .then(contracts => contracts.map(contract => ({label: contract, value: contract})))
         .then(contracts => this.setState({contracts: contracts}))
     }

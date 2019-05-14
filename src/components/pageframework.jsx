@@ -16,6 +16,7 @@ import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
+import FiberManualRecord from '@material-ui/icons/FiberManualRecord';
 import CloudUpload from '@material-ui/icons/CloudUpload';
 import CheckCircleOutline from '@material-ui/icons/CheckCircleOutline';
 import { fade } from '@material-ui/core/styles/colorManipulator';
@@ -23,6 +24,7 @@ import { fade } from '@material-ui/core/styles/colorManipulator';
 
 import MonacoEditor from "../components/monacoeditor"
 import ContractSearch from "../components/fragments/contractsearch"
+import * as API from '../js/contracting_api.ts';
 
 
 const drawerWidth = 240;
@@ -102,6 +104,15 @@ const styles = theme => ({
     flexGrow: 1,
    // padding: theme.spacing.unit * 3,
   },
+  statusOnline: {
+    fill: 'green',
+  },
+  statusOffline: {
+    fill: 'red',
+  },
+  statusPending: {
+    fill: 'orange',
+  }
 });
 
 class PageFramework extends React.Component {
@@ -113,7 +124,8 @@ class PageFramework extends React.Component {
       editorValue:  [ '# This is where the revolution begins... \n', ' \n', ' \n', ' \n'].join('\n'),
       newContract: undefined,
       windowHeight: undefined,
-      windowWidth: undefined
+      windowWidth: undefined,
+      ApiInfo: {status:'Offline', server:'http://localhost', port: '8080'},
     };
     
     /*
@@ -122,6 +134,44 @@ class PageFramework extends React.Component {
     */
    
 }
+
+  componentDidMount() {
+    this.handleResize();
+    window.addEventListener('resize', this.handleResize)
+    this.connectToAPI();
+
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.handleResize)
+  }
+
+  changeApiServer = (newServer, port) => {
+    let apiInfo = this.state.ApiInfo;
+    apiInfo.server = newServer;
+    apiInfo.port = port;
+    this.setState({ApiInfo: apiInfo}, () => {
+      this.connectToAPI(this.state.ApiInfo.server);
+    });
+  }
+
+  connectToAPI = () => {
+    let apiInfo = this.state.ApiInfo;
+    apiInfo.status = 'Pending';
+    this.setState({ ApiInfo: apiInfo }, () => {
+      API.apicheck(this.state.ApiInfo).then(data => this.setApiStatus(data));
+    });
+  }
+
+  setApiStatus = (status) => {
+    let apiInfo = this.state.ApiInfo;
+    apiInfo.status = 'Online';
+    if (status === 'indeed'){
+      apiInfo.status = this.state.ApiInfo
+      apiInfo.status = 'Online';
+    }
+    this.setState({ApiInfo: apiInfo});
+  }
 
   handleDrawerOpen = () => {
     this.setState({ open: true, editorWidth: '80vw' });
@@ -145,16 +195,6 @@ class PageFramework extends React.Component {
     windowHeight: window.innerHeight,
     windowWidth: window.innerWidth
   });
-
-  componentDidMount() {
-    this.handleResize();
-    window.addEventListener('resize', this.handleResize)
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('resize', this.handleResize)
-  }
- 
 
   render() {
     const { classes, theme } = this.props;
@@ -184,8 +224,9 @@ class PageFramework extends React.Component {
               Lamden
             </Typography>
             <div className={classes.search}>
-              <ContractSearch selectedContract={this.setNewValue}/>
+              <ContractSearch ApiInfo={this.state.ApiInfo} selectedContract={this.setNewValue}/>
             </div>
+            {this.state.ApiInfo.server}
           </Toolbar>
         </AppBar>
         <Drawer
@@ -209,9 +250,17 @@ class PageFramework extends React.Component {
           </div>
           <Divider />
           <List>
-            <ListItem button key='CheckAPI' onClick={() => this.ClickController('CheckAPI')}>
-              <ListItemIcon> <CheckCircleOutline /></ListItemIcon>
-              <ListItemText primary='CheckAPI' />
+            <ListItem key='apistatus' title={'API Connection ' + this.state.apiStatus}>
+              <ListItemIcon> 
+                <FiberManualRecord className={classNames({
+                                                          [classes.statusOnline]: this.state.ApiInfo.status === 'Online',
+                                                          [classes.statusPending]: this.state.ApiInfo.status === 'Pending',
+                                                          [classes.statusOffline]: this.state.ApiInfo.status === 'Offline'}
+                                                        )}
+                />
+
+              </ListItemIcon>
+              <ListItemText primary={this.state.apiStatus} />
             </ListItem>
             <ListItem button key='Lint' onClick={() => this.ClickController('Lint')}>
               <ListItemIcon><CloudUpload /></ListItemIcon>
@@ -222,6 +271,7 @@ class PageFramework extends React.Component {
         <main className={classes.content}>
             <MonacoEditor 
               setClick={click => this.ClickController = click}
+              ApiInfo={this.state.ApiInfo}
               value={this.state.editorValue}
               newContract={this.state.newContract}
               width={this.state.open ? this.state.windowWidth - drawerWidth : this.state.windowWidth}
