@@ -190,9 +190,7 @@ class PageFramework extends React.Component {
 
   setNewValue = (contract) => {
       const allcookies = cookies.getAll();
-      console.log(allcookies)
       let openFiles = cookies.get('openfiles');
-      console.log(openFiles)
       if(!openFiles){
           cookies.set('openfiles', [contract])
           this.setState({ newContract: [contract] })
@@ -203,7 +201,6 @@ class PageFramework extends React.Component {
           this.setState({ newContract: [contract] })
         }
       }   
-      console.log(cookies.get('openfiles'))
   }
 
   handleResize = () => this.setState({

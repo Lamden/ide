@@ -94,10 +94,8 @@ class MonacoWindow extends Component {
         this.monaco = monaco;
         this.editor = this.monaco.editor.create(document.getElementById("editor-container"), {automaticLayout: true});
         
-        cookies.remove('openfiles')
         const files = cookies.getAll();
-        console.log(files);
-        
+
         if (!files['openfiles']){
           cookies.set('openfiles', [])
           this.createNewFile('# Welcome to the blockchain revolution', 'new contract');
@@ -175,9 +173,7 @@ class MonacoWindow extends Component {
   }
 
   handleFileSwitching = (name) => {
-    console.log(name)
     const model = this.state.models.get(name);
-    console.log(model)
     this.editor.setModel(model);
     //this.setState({currentTab: {name, id: model.id}})
   }
@@ -211,11 +207,9 @@ class MonacoWindow extends Component {
       cookies.set('openfiles', openFiles);
       
       const tabNames = Array.from( this.state.models.keys() );
-      console.log(tabNames)
       if (tabNames.length > 0){
         this.handleFileSwitching(tabNames[0])
       }else{
-        console.log('no tabs open')
         this.createNewFile('# Welcome to the blockchain revolution', 'new contract');
       }
     })
