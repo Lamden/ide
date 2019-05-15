@@ -3,7 +3,7 @@ import PropTypes from "prop-types"
 
 //import MainMenu from './mainmenu';
 import PageFramework from "../components/pageframework"
-import { SnackbarProvider, withSnackbar} from 'notistack';
+import { SnackbarProvider } from 'notistack';
 
 
 

@@ -72,7 +72,7 @@ class ErrorBox extends Component {
                 className={classNames(classes.root)}>
 
                 <div className={classNames(classes.heading, { 
-                                            [classes.headingChecking]: (errors.length == 0),
+                                            [classes.headingChecking]: (errors.length === 0),
                                             [classes.headingPass]: (errors.length === 1 && (errors[0] === 'ok' || errors[0] === 'success!')),
                                             [classes.headingErrors]: (errors.length > 0) })}>
                     {'Console: '}

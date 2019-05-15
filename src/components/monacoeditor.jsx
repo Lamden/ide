@@ -7,21 +7,39 @@ import { withSnackbar } from 'notistack';
 import * as API from '../js/contracting_api.ts';
 import ErrorBox from "../components/errorbox"
 
-const errorBoxHeight = 200;
+const errorBoxHeight = 150;
 const appBarHeight = 100;
+const tabsHeight = 37;
 
 const EditorContainer = (props) => {
   return <div
           style={{
             width: props.width ? props.width : '500px', 
-            height: props.height ? props.height - (errorBoxHeight + appBarHeight) : '500px' , 
-            margin: '5rem 0 0'}}
+            height: props.height ? props.height - (errorBoxHeight + appBarHeight + tabsHeight): '500px',
+            borderTop: '2px solid #45387F', paddingTop: '10px'}}
           id="editor-container"></div>
 };
 
 const styles = theme => ({
   root: {
-    display: 'flex',
+    marginTop: '4.25rem'
+  },
+  tabs: {
+    height: tabsHeight + 'px',
+    backgroundColor: 'white',
+    borderWidth: '2px 2px 0px 2px',
+    borderRadius: '10px 10px 0 0',
+    borderStyle: 'solid',
+    borderColor: '#45387F',
+    margin: '0 2px',
+    padding: '0 12px',
+    '&:focus': {outline:'0'}
+  },
+  tabSelected: {
+    backgroundColor: '#E4ECF0'
+  },
+  tabUnselected: {
+    backgroundColor: 'white'
   }
 });
 
@@ -31,7 +49,9 @@ class MonacoWindow extends Component {
       super(props);
       this.clickController = this.clickController.bind(this);
       this.state = {
-        errors: ''
+        errors: '',
+        models: new Map(),
+        currentTab: {},
       }
       this.editor = null; 
       this.monaco = null;
@@ -41,12 +61,9 @@ class MonacoWindow extends Component {
     import("monaco-editor")
       .then( monaco => {
         this.monaco = monaco;
-        this.editor = this.monaco.editor.create(document.getElementById("editor-container"), {
-          value: this.props.value,
-          language: "python",
-          automaticLayout: true
+        this.editor = this.monaco.editor.create(document.getElementById("editor-container"), {automaticLayout: true});
+        this.createNewFile('#This is a new file', 'new contact');
 
-        });
         this.props.setClick(this.clickController);
       })
   }
@@ -57,7 +74,7 @@ class MonacoWindow extends Component {
    // console.log(this.props.newContract === prevProps.newContract)
     if (this.props.newContract && this.props.newContract !== prevProps.newContract){
     //  console.log(this.props.newContract[0]);
-      API.contract(this.props.ApiInfo, this.props.newContract[0]).then(data => this.setEditorValue(data.toString()));
+      API.contract(this.props.ApiInfo, this.props.newContract[0]).then(data => this.createNewFile(data.toString(), this.props.newContract[0]));
     }
   }
 
@@ -70,7 +87,7 @@ class MonacoWindow extends Component {
         API.contracts().then(data => this.setEditorValue(data.toString()));
         break;
       case "Contract":
-        API.contract('submission').then(data => this.setEditorValue(data.toString()));
+        API.contract('submission').then(data => this.createNewFile(data.toString()));
         break;
       case "Lint":
         this.props.enqueueSnackbar('Checking contract for errors...', { variant: 'info' });
@@ -78,7 +95,12 @@ class MonacoWindow extends Component {
         break;
       case "Submit":
         this.props.enqueueSnackbar('Attempting to submit contract...', { variant: 'info' });
-        API.submit_contract(this.props.ApiInfo, 'testName', this.getEditorValue()).then(data => this.handleErrors(data));
+        try{
+          API.submit_contract(this.props.ApiInfo, 'testName', this.getEditorValue()).then(data => this.handleErrors(data));
+        } catch (e) {
+          this.props.enqueueSnackbar(e.message, { variant: 'error' });
+        }
+        
         break;
       case "AddDecoration":
         this.addDecoration();
@@ -96,10 +118,44 @@ class MonacoWindow extends Component {
   }
 
   setEditorValue = (value) =>{
-    return this.editor.setValue(value);
+    this.createNewFile(value);
+    //this.editor.setValue(value);
+  }
+
+  createNewFile = (value, name) => {
+    console.log(value)
+    console.log(name)
+    let models = this.state.models;
+    if (!models.has(name)){
+      console.log('createing model');
+      const newFile = this.monaco.editor.createModel(value, 'python');
+      console.log(models);
+      this.editor.setModel(newFile);
+      models.set(name, newFile);
+      console.log(models);
+
+      this.setState({ models, currentTab: {name, id: newFile.id}})
+    }else{
+      console.log('model exists');
+      this.handleFileSwitching(name);
+    }
+  }
+
+  handleFileSwitching = (name) => {
+    const model = this.state.models.get(name);
+    this.editor.setModel(model);
+    this.setState({currentTab: {name, id: model.id}})
   }
 
   handleErrors = (errors) => {
+    try{
+      const test = JSON.parse(errors);
+    } catch (e) {
+      this.props.enqueueSnackbar('Error: Unexpected API Result', { variant: 'error' });
+      this.setState({ errors: [e.message] });
+      return
+    }
+
     if (errors === 'null'){
       this.setState({ errors: ['ok'] });
       this.props.enqueueSnackbar('Contract has 0 Errors!', { variant: 'success' });
@@ -121,23 +177,32 @@ class MonacoWindow extends Component {
     }
   }
 
-  addDecoration = () => {
-    this.editor.deltaDecorations([], [
-      { range: new this.monaco.Range(3,1,5,1), options: { isWholeLine: true, linesDecorationsClassName: 'myLineDecoration' }},
-      { range: new this.monaco.Range(7,1,7,24), options: { inlineClassName: 'myInlineDecoration' }},
-    ]);
-  }
-
-  delDecoration = () => {
-    this.editor.deltaDecorations([], []);
+  isTabSeleted = (model) => {
+    if (this.state.currentTab.id === model.id) {return true}
+    return false
   }
 
   render() {
     const { classes, theme } = this.props
+
+    const buttons = []
+
+    for (const [index, value] of this.state.models.entries()) {
+      buttons.push(<button 
+                      onClick={() =>  this.handleFileSwitching(index)} 
+                      className={classNames(classes.tabs, {
+                                            [classes.tabSelected]: this.isTabSeleted(value),
+                                            [classes.tabUnselected]: !this.isTabSeleted(value)})} key={index}>
+                        {index}
+                    </button>)
+    }
       return (
-        <div>
-            <EditorContainer width={this.props.width} height={this.props.height} className="monaco-window" />
-            <ErrorBox width={this.props.drawerOpen ? this.props.width : this.props.width - 73} height={errorBoxHeight} errors={this.state.errors} />
+        <div className={classNames(classes.root)}>
+            <div>
+              {buttons}
+            </div>
+            <EditorContainer width={this.props.drawerOpen ? this.props.width : this.props.width - 73} height={this.props.height} className="monaco-window" />
+            <ErrorBox width={this.props.drawerOpen ? this.props.width - 12 : this.props.width - 85} height={errorBoxHeight} errors={this.state.errors} />
         </div>
       );
   }

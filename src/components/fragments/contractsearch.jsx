@@ -31,6 +31,7 @@ const styles = theme => ({
     flex: 1,
     alignItems: 'center',
     overflow: 'hidden',
+    paddingLeft: '10px'
   },
   chip: {
     margin: `${theme.spacing.unit / 2}px ${theme.spacing.unit / 4}px`,
@@ -46,6 +47,7 @@ const styles = theme => ({
   },
   singleValue: {
     fontSize: 16,
+    color: '#d6d6d6'
   },
   placeholder: {
     position: 'absolute',
