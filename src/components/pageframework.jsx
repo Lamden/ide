@@ -25,6 +25,9 @@ import { fade } from '@material-ui/core/styles/colorManipulator';
 import MonacoEditor from "../components/monacoeditor"
 import ContractSearch from "../components/fragments/contractsearch"
 import * as API from '../js/contracting_api.ts';
+import Cookies from 'universal-cookie';
+
+const cookies = new Cookies();
 
 
 const drawerWidth = 240;
@@ -186,9 +189,19 @@ class PageFramework extends React.Component {
   }
 
   setNewValue = (contract) => {
-    this.setState({
-      newContract: [contract],
-    })
+    this.setState({ newContract: [contract] }, () => {
+
+      let openFiles = cookies.get('openfiles');
+
+      if(!openFiles){
+        cookies.set('openfiles', [contract])
+      }else{
+        openFiles.push(contract)
+        cookies.set('openfiles', openFiles)
+      }   
+      
+      console.log(cookies.get('openfiles'))
+    });
   }
 
   handleResize = () => this.setState({

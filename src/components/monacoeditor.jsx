@@ -5,7 +5,20 @@ import { withStyles } from '@material-ui/core/styles';
 import { withSnackbar } from 'notistack';
 
 import * as API from '../js/contracting_api.ts';
-import ErrorBox from "../components/errorbox"
+import ErrorBox from "../components/errorbox";
+import Cookies from 'universal-cookie';
+
+const cookies = new Cookies();
+
+const waitFor = (ms) => new Promise(r => setTimeout(r, ms));
+
+async function asyncForEach(array, callback) {
+  for (let index = 0; index < array.length; index++) {
+    await callback(array[index], index, array);
+  }
+}
+
+
 
 const errorBoxHeight = 150;
 const appBarHeight = 100;
@@ -22,6 +35,7 @@ const EditorContainer = (props) => {
 
 const styles = theme => ({
   root: {
+    height: tabsHeight + 'px',
     marginTop: '4.25rem'
   },
   tabs: {
@@ -62,19 +76,26 @@ class MonacoWindow extends Component {
       .then( monaco => {
         this.monaco = monaco;
         this.editor = this.monaco.editor.create(document.getElementById("editor-container"), {automaticLayout: true});
-        this.createNewFile('#This is a new file', 'new contact');
+        
+        const files = cookies.getAll();
+        console.log(files);
+        
+        if (!files['openfiles']){
+          this.createNewFile('# Welcome to the blockchain revolution', 'new contract');
+        }else{
+          this.openCookieFiles(files['openfiles'])
+        }
 
         this.props.setClick(this.clickController);
+
       })
   }
 
   componentDidUpdate(prevProps, prevState, snapshot){
-   // console.log(prevProps.newContract)
-   // console.log(this.props.newContract)
-   // console.log(this.props.newContract === prevProps.newContract)
     if (this.props.newContract && this.props.newContract !== prevProps.newContract){
-    //  console.log(this.props.newContract[0]);
-      API.contract(this.props.ApiInfo, this.props.newContract[0]).then(data => this.createNewFile(data.toString(), this.props.newContract[0]));
+      
+      API.contract(this.props.ApiInfo, this.props.newContract[0])
+        .then(data => this.createNewFile(data.toString(), this.props.newContract[0]))
     }
   }
 
@@ -123,20 +144,13 @@ class MonacoWindow extends Component {
   }
 
   createNewFile = (value, name) => {
-    console.log(value)
-    console.log(name)
     let models = this.state.models;
     if (!models.has(name)){
-      console.log('createing model');
       const newFile = this.monaco.editor.createModel(value, 'python');
-      console.log(models);
       this.editor.setModel(newFile);
       models.set(name, newFile);
-      console.log(models);
-
       this.setState({ models, currentTab: {name, id: newFile.id}})
-    }else{
-      console.log('model exists');
+    }else{     
       this.handleFileSwitching(name);
     }
   }
@@ -145,6 +159,28 @@ class MonacoWindow extends Component {
     const model = this.state.models.get(name);
     this.editor.setModel(model);
     this.setState({currentTab: {name, id: model.id}})
+  }
+
+  openCookieFiles = async (openfiles) => {
+    let models = this.state.models;
+    console.log(openfiles)
+    await asyncForEach( openfiles, async (filename) => {
+      await waitFor(50);
+      console.log('opening: ' + filename)
+      API.contract(this.props.ApiInfo, filename)
+      .then(data => this.createTab(data.toString()))
+      .then(model => models.set(filename, model));
+    });
+    
+    this.setState({ models }, () => {
+      this.handleFileSwitching(openfiles[0])
+    })
+  }
+
+  createTab = (value) => {
+    const newTab = this.monaco.editor.createModel(value, 'python');
+    this.editor.setModel(newTab);
+    return newTab
   }
 
   handleErrors = (errors) => {
@@ -188,6 +224,7 @@ class MonacoWindow extends Component {
     const buttons = []
 
     for (const [index, value] of this.state.models.entries()) {
+      console.log('creating button: ' + index)
       buttons.push(<button 
                       onClick={() =>  this.handleFileSwitching(index)} 
                       className={classNames(classes.tabs, {
