@@ -189,18 +189,17 @@ class PageFramework extends React.Component {
   }
 
   setNewValue = (contract) => {
-      const allcookies = cookies.getAll();
-      let openFiles = cookies.get('openfiles');
-      if(!openFiles){
-          cookies.set('openfiles', [contract])
-          this.setState({ newContract: [contract] })
-      }else{
-        if (openFiles.indexOf(contract) === -1){
-          openFiles.push(contract)
-          cookies.set('openfiles', openFiles)
-          this.setState({ newContract: [contract] })
-        }
-      }   
+    let openFiles = cookies.get('openfiles');
+    if(!openFiles){
+        cookies.set('openfiles', [contract])
+        this.setState({ newContract: [contract] })
+    }else{
+      if (openFiles.indexOf(contract) === -1){
+        openFiles.push(contract)
+        cookies.set('openfiles', openFiles)
+        this.setState({ newContract: [contract] })
+      }
+    }   
   }
 
   handleResize = () => this.setState({

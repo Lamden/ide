@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
 import { withSnackbar } from 'notistack';
-import Close from '@material-ui/icons/Close';
+import { Close, FiberNewOutlined } from '@material-ui/icons';
 
 import * as API from '../js/contracting_api.ts';
 import ErrorBox from "../components/errorbox";
@@ -18,8 +18,6 @@ async function asyncForEach(array, callback) {
     await callback(array[index], index, array);
   }
 }
-
-
 
 const errorBoxHeight = 150;
 const appBarHeight = 100;
@@ -58,7 +56,8 @@ const styles = theme => ({
     '&:focus': {outline:'1px'}
   },
   tabSelected: {
-    backgroundColor: '#E4ECF0'
+    backgroundColor: '#E4ECF0',
+    fontWeight: 'bold',
   },
   tabClose: {
     height: '16px',
@@ -68,6 +67,14 @@ const styles = theme => ({
     border: '1px solid grey',
     borderRadius: '50%',
     width: '16px',
+  },
+  newTab:{
+    position: 'relative',
+    top: '6px',
+    width: '43px',
+    padding: '0',
+    margin: '-12px 0',
+    fontSize: '269%'
   },
   tabUnselected: {
     backgroundColor: 'white'
@@ -80,6 +87,7 @@ class MonacoWindow extends Component {
       super(props);
       this.clickController = this.clickController.bind(this);
       this.state = {
+        startingWords: '# Welcome to the blockchain revolution',
         errors: '',
         models: new Map(),
         currentTab: {},
@@ -94,17 +102,17 @@ class MonacoWindow extends Component {
         this.monaco = monaco;
         this.editor = this.monaco.editor.create(document.getElementById("editor-container"), {automaticLayout: true});
         
-        const files = cookies.getAll();
 
+        const files = cookies.getAll();
+        //cookies.remove('openfiles');
         if (!files['openfiles']){
-          cookies.set('openfiles', [])
-          this.createNewFile('# Welcome to the blockchain revolution', 'new contract');
+          this.createNewFile(this.state.startingWords, 'new contract');
         }else{
+          this.createNewFile(this.state.startingWords, 'new contract');
           this.openCookieFiles(files['openfiles'])
         }
 
         this.props.setClick(this.clickController);
-
       })
   }
 
@@ -157,7 +165,6 @@ class MonacoWindow extends Component {
 
   setEditorValue = (value) =>{
     this.createNewFile(value);
-    //this.editor.setValue(value);
   }
 
   createNewFile = (value, name) => {
@@ -174,28 +181,38 @@ class MonacoWindow extends Component {
 
   handleFileSwitching = (name) => {
     const model = this.state.models.get(name);
-    this.editor.setModel(model);
-    //this.setState({currentTab: {name, id: model.id}})
+    if (model){
+      this.editor.setModel(model);
+      this.setState({currentTab: {name, id: model['id']}})
+    }
+
   }
 
   openCookieFiles = async (openfiles) => {
     let models = this.state.models;
-    await asyncForEach( openfiles, async (filename) => {
-      await waitFor(50);
+    openfiles.forEach(filename => {
       API.contract(this.props.ApiInfo, filename)
       .then(data => this.createTab(data.toString()))
-      .then(model => models.set(filename, model));
+      .then(model => this.setState({ models: this.state.models.set(filename, model) }));
     });
-    
-    this.setState({ models }, () => {
-      this.handleFileSwitching(openfiles[0])
-    })
   }
 
   createTab = (value) => {
     const newTab = this.monaco.editor.createModel(value, 'python');
     this.editor.setModel(newTab);
     return newTab
+  }
+
+  newTab = () => {
+    const tabNames = Array.from( this.state.models.keys() );
+    let newNum = 0;
+    for (let i; i < tabNames.length; i++){
+      if (tabNames[i].includes('new contract')){
+        newNum = newNum + 1
+      }
+    }
+    newNum === 0 ? newNum = '' : newNum = newNum.toString()
+    this.createNewFile(this.state.startingWords, 'new contract' + newNum)
   }
 
   closeTab = (name) => {
@@ -253,10 +270,10 @@ class MonacoWindow extends Component {
   render() {
     const { classes, theme } = this.props
 
-    const buttons = []
+    const tabs = []
 
     for (const [index, value] of this.state.models.entries()) {
-      buttons.push(
+      tabs.push(
                   <div className={classNames(classes.tabs, {
                         [classes.tabSelected]: this.isTabSeleted(value),
                         [classes.tabUnselected]: !this.isTabSeleted(value)})} key={index}>
@@ -269,9 +286,12 @@ class MonacoWindow extends Component {
     }
       return (
         <div className={classNames(classes.root)}>
-            <div>
-              {buttons}
-            </div>
+            <span>
+                <FiberNewOutlined onClick={() =>  this.newTab()} className={classNames(classes.newTab)} />
+            </span>
+            <span>
+              {tabs}
+            </span>
             <EditorContainer width={this.props.drawerOpen ? this.props.width : this.props.width - 73} height={this.props.height} className="monaco-window" />
             <ErrorBox width={this.props.drawerOpen ? this.props.width - 12 : this.props.width - 85} height={errorBoxHeight} errors={this.state.errors} />
         </div>
