@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
 import { withSnackbar } from 'notistack';
+import Close from '@material-ui/icons/Close';
 
 import * as API from '../js/contracting_api.ts';
 import ErrorBox from "../components/errorbox";
@@ -35,10 +36,12 @@ const EditorContainer = (props) => {
 
 const styles = theme => ({
   root: {
+    
     height: tabsHeight + 'px',
     marginTop: '4.25rem'
   },
   tabs: {
+    display: 'inline',
     height: tabsHeight + 'px',
     backgroundColor: 'white',
     borderWidth: '2px 2px 0px 2px',
@@ -49,8 +52,22 @@ const styles = theme => ({
     padding: '0 12px',
     '&:focus': {outline:'0'}
   },
+  tabButton: {
+    backgroundColor: 'transparent',
+    border: '0',
+    '&:focus': {outline:'1px'}
+  },
   tabSelected: {
     backgroundColor: '#E4ECF0'
+  },
+  tabClose: {
+    height: '16px',
+    position: 'relative',
+    top: '3px',
+    left: '8px',
+    border: '1px solid grey',
+    borderRadius: '50%',
+    width: '16px',
   },
   tabUnselected: {
     backgroundColor: 'white'
@@ -77,10 +94,12 @@ class MonacoWindow extends Component {
         this.monaco = monaco;
         this.editor = this.monaco.editor.create(document.getElementById("editor-container"), {automaticLayout: true});
         
+        cookies.remove('openfiles')
         const files = cookies.getAll();
         console.log(files);
         
         if (!files['openfiles']){
+          cookies.set('openfiles', [])
           this.createNewFile('# Welcome to the blockchain revolution', 'new contract');
         }else{
           this.openCookieFiles(files['openfiles'])
@@ -156,17 +175,17 @@ class MonacoWindow extends Component {
   }
 
   handleFileSwitching = (name) => {
+    console.log(name)
     const model = this.state.models.get(name);
+    console.log(model)
     this.editor.setModel(model);
-    this.setState({currentTab: {name, id: model.id}})
+    //this.setState({currentTab: {name, id: model.id}})
   }
 
   openCookieFiles = async (openfiles) => {
     let models = this.state.models;
-    console.log(openfiles)
     await asyncForEach( openfiles, async (filename) => {
       await waitFor(50);
-      console.log('opening: ' + filename)
       API.contract(this.props.ApiInfo, filename)
       .then(data => this.createTab(data.toString()))
       .then(model => models.set(filename, model));
@@ -181,6 +200,25 @@ class MonacoWindow extends Component {
     const newTab = this.monaco.editor.createModel(value, 'python');
     this.editor.setModel(newTab);
     return newTab
+  }
+
+  closeTab = (name) => {
+    let models = this.state.models;
+    models.delete(name)
+    this.setState({ models }, () => {
+      var openFiles = cookies.get('openfiles');
+      openFiles.splice(openFiles.indexOf(name))
+      cookies.set('openfiles', openFiles);
+      
+      const tabNames = Array.from( this.state.models.keys() );
+      console.log(tabNames)
+      if (tabNames.length > 0){
+        this.handleFileSwitching(tabNames[0])
+      }else{
+        console.log('no tabs open')
+        this.createNewFile('# Welcome to the blockchain revolution', 'new contract');
+      }
+    })
   }
 
   handleErrors = (errors) => {
@@ -224,14 +262,16 @@ class MonacoWindow extends Component {
     const buttons = []
 
     for (const [index, value] of this.state.models.entries()) {
-      console.log('creating button: ' + index)
-      buttons.push(<button 
-                      onClick={() =>  this.handleFileSwitching(index)} 
-                      className={classNames(classes.tabs, {
-                                            [classes.tabSelected]: this.isTabSeleted(value),
-                                            [classes.tabUnselected]: !this.isTabSeleted(value)})} key={index}>
-                        {index}
-                    </button>)
+      buttons.push(
+                  <div className={classNames(classes.tabs, {
+                        [classes.tabSelected]: this.isTabSeleted(value),
+                        [classes.tabUnselected]: !this.isTabSeleted(value)})} key={index}>
+                    <button className={classNames(classes.tabButton)}
+                            onClick={() =>  this.handleFileSwitching(index)}> {index} </button>
+                    <Close className={classNames(classes.tabClose)} 
+                           onClick={() =>  this.closeTab(index)}/>
+                  </div>  
+                  )
     }
       return (
         <div className={classNames(classes.root)}>
