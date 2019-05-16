@@ -63,11 +63,12 @@ const styles = theme => ({
       backgroundColor: fade(theme.palette.common.white, 0.25),
     },
     marginRight: theme.spacing.unit * 5,
-    marginLeft: 0,
-    width: '120%',
-    [theme.breakpoints.up('sm')]: {
+    marginLeft: theme.spacing.unit * 6,
+    width: '20%',
+    minWidth: '250px',
+    [theme.breakpoints.only('xs')]: {
       marginLeft: theme.spacing.unit * 3,
-      width: 'auto',
+      minWidth: '200px'
     },
   },
   hide: {
@@ -129,8 +130,9 @@ class PageFramework extends React.Component {
       windowHeight: undefined,
       windowWidth: undefined,
       ApiInfo: {status:'Offline', server:'http://localhost', port: '8080'},
+      contractList: []
     };
-    
+
     /*
      Bind our childHandler function to this context
      that will get called from our Child component
@@ -162,18 +164,23 @@ class PageFramework extends React.Component {
     let apiInfo = this.state.ApiInfo;
     apiInfo.status = 'Pending';
     this.setState({ ApiInfo: apiInfo }, () => {
-      API.apicheck(this.state.ApiInfo).then(data => this.setApiStatus(data));
+        API.apicheck(this.state.ApiInfo)
+          .then(data => this.setApiStatus(data))
+          .catch(e => this.setApiStatus(e))
     });
   }
 
   setApiStatus = (status) => {
     let apiInfo = this.state.ApiInfo;
-    apiInfo.status = 'Online';
+    apiInfo.status = 'Offline';
     if (status === 'indeed'){
-      apiInfo.status = this.state.ApiInfo
       apiInfo.status = 'Online';
     }
-    this.setState({ApiInfo: apiInfo});
+    this.setState({ApiInfo: apiInfo}, () => {
+      API.contracts(this.state.ApiInfo)
+        .then(data => data.map(contract => ({label: contract, value: contract})))
+        .then(contractList => this.setState({contractList}));
+    });
   }
 
   handleDrawerOpen = () => {
@@ -235,7 +242,7 @@ class PageFramework extends React.Component {
               Lamden
             </Typography>
             <div className={classes.search}>
-              <ContractSearch ApiInfo={this.state.ApiInfo} selectedContract={this.setNewValue}/>
+              <ContractSearch ApiInfo={this.state.ApiInfo} selectedContract={this.setNewValue} contracts={this.state.contractList}/>
             </div>
           </Toolbar>
         </AppBar>

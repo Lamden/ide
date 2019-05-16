@@ -5,9 +5,13 @@ function apiURL (apiInfo, ENDPOINT){
 
 export function apicheck(apiInfo){
     const ENDPOINT = '/';
+    
     return new Promise (function(resolve, reject){
         fetch(apiURL(apiInfo, ENDPOINT))
         .then(response => resolve (response.text()))
+        .catch((error) => {
+            reject(error);
+          });
     });
 }
 
@@ -16,6 +20,9 @@ export function contracts(apiInfo){
     return new Promise (function(resolve, reject){
         fetch(apiURL(apiInfo, ENDPOINT))
         .then(response => resolve (response.json()))
+        .catch((error) => {
+            console.log(error);
+          });
     });
 }
 
@@ -24,6 +31,9 @@ export function contract(apiInfo, contract){
     return new Promise (function(resolve, reject){
         fetch(apiURL(apiInfo, ENDPOINT) + contract)
         .then(response => resolve (response.text()))
+        .catch((error) => {
+            console.log(error);
+          });
     });
 }
 
@@ -35,6 +45,9 @@ export function lint(apiInfo, name, code){
             body: JSON.stringify({name, code})
         })
         .then(response => resolve (response.text()))
+        .catch((error) => {
+            console.log(error);
+          });
     });
 }
 
@@ -46,6 +59,9 @@ export function submit_contract(apiInfo, name, code){
             body: JSON.stringify({name, code})
         })
         .then(response => resolve (response.text()))
+        .catch((error) => {
+            console.log(error);
+          });
     });
 }
 

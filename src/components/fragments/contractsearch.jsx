@@ -19,7 +19,6 @@ import * as API from '../../js/contracting_api.ts';
 const styles = theme => ({
   root: {
     flexGrow: 1,
-    width: '300px',
   },
   input: {
     display: 'flex',
@@ -53,6 +52,8 @@ const styles = theme => ({
     position: 'absolute',
     left: 2,
     fontSize: 16,
+    paddingLeft: '5px',
+    color: '#aaaaaa'
   },
   paper: {
     position: 'absolute',
@@ -177,10 +178,10 @@ class ContractSearch extends React.Component {
         contracts: []
     };
 
-    componentDidMount() {
-        API.contracts(this.props.ApiInfo)
-            .then(contracts => contracts.map(contract => ({label: contract, value: contract})))
-            .then(contracts => this.setState({contracts: contracts}))
+    componentDidUpdate(){
+      if (this.state.contracts !== this.props.contracts){
+        this.updateContractList(this.props.contracts);
+      }
     }
 
     handleChange = name => value => {
@@ -194,11 +195,8 @@ class ContractSearch extends React.Component {
         
     };
 
-
-    updateContracts = () => {
-        API.contracts(this.props.ApiInfo)
-        .then(contracts => contracts.map(contract => ({label: contract, value: contract})))
-        .then(contracts => this.setState({contracts: contracts}))
+    updateContractList = (contracts) => {
+      this.setState({ contracts })
     }
 
   render() {

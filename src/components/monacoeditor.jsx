@@ -87,13 +87,15 @@ class MonacoWindow extends Component {
       super(props);
       this.clickController = this.clickController.bind(this);
       this.state = {
-        startingWords: '# Welcome to the blockchain revolution',
         errors: '',
         models: new Map(),
         currentTab: {},
       }
       this.editor = null; 
       this.monaco = null;
+      this.startingWords = '# Welcome to the blockchain revolution';
+      this.newContractName = 'new contract ';
+      this.prevStatus = 'Offline';
   }
 
   componentDidMount() {
@@ -102,39 +104,39 @@ class MonacoWindow extends Component {
         this.monaco = monaco;
         this.editor = this.monaco.editor.create(document.getElementById("editor-container"), {automaticLayout: true});
         
-
-        const files = cookies.getAll();
         //cookies.remove('openfiles');
-        if (!files['openfiles']){
-          this.createNewFile(this.state.startingWords, 'new contract');
-        }else{
-          this.createNewFile(this.state.startingWords, 'new contract');
-          this.openCookieFiles(files['openfiles'])
-        }
-
+        this.newTab();
+        
         this.props.setClick(this.clickController);
       })
   }
 
+  componentWillUnmount() {
+    cookies.removeChangeListener();
+  }
+
   componentDidUpdate(prevProps, prevState, snapshot){
+    if (this.props.ApiInfo.status === 'Offline' || this.props.ApiInfo.status === 'Pending'){
+      this.prevStatus = 'Offline';
+    }
+
+    if (this.prevStatus === 'Offline' && this.props.ApiInfo.status === 'Online'){
+      this.prevStatus = 'Online';
+      const files = cookies.getAll();
+      if (files['openfiles']){
+        this.createNewFile(this.startingWords, this.newContractName + '1');
+        this.openCookieFiles(files['openfiles'])
+      }
+    }
+
     if (this.props.newContract && this.props.newContract !== prevProps.newContract){
-      
       API.contract(this.props.ApiInfo, this.props.newContract[0])
         .then(data => this.createNewFile(data.toString(), this.props.newContract[0]))
-    }
+      }
   }
 
   clickController = (action) =>{
     switch(action) {
-      case "CheckAPI":
-        API.apicheck().then(data => this.setEditorValue(data))
-        break;
-      case "Contracts":
-        API.contracts().then(data => this.setEditorValue(data.toString()));
-        break;
-      case "Contract":
-        API.contract('submission').then(data => this.createNewFile(data.toString()));
-        break;
       case "Lint":
         this.props.enqueueSnackbar('Checking contract for errors...', { variant: 'info' });
         API.lint(this.props.ApiInfo, 'testName', this.getEditorValue()).then(data => this.handleErrors(data));
@@ -146,14 +148,6 @@ class MonacoWindow extends Component {
         } catch (e) {
           this.props.enqueueSnackbar(e.message, { variant: 'error' });
         }
-        
-        break;
-      case "AddDecoration":
-        this.addDecoration();
-      break;
-      case "DelDecoration":
-        this.delDecoration();
-      break;
       default:
         break;
     }
@@ -189,30 +183,34 @@ class MonacoWindow extends Component {
   }
 
   openCookieFiles = async (openfiles) => {
-    let models = this.state.models;
     openfiles.forEach(filename => {
       API.contract(this.props.ApiInfo, filename)
-      .then(data => this.createTab(data.toString()))
+      .then(data => this.createModel(data.toString()))
       .then(model => this.setState({ models: this.state.models.set(filename, model) }));
     });
   }
 
-  createTab = (value) => {
-    const newTab = this.monaco.editor.createModel(value, 'python');
-    this.editor.setModel(newTab);
-    return newTab
+  createModel = (value) => {
+    const model = this.monaco.editor.createModel(value, 'python');
+    this.editor.setModel(model);
+    return model
   }
 
   newTab = () => {
-    const tabNames = Array.from( this.state.models.keys() );
-    let newNum = 0;
-    for (let i; i < tabNames.length; i++){
-      if (tabNames[i].includes('new contract')){
-        newNum = newNum + 1
+    let i =1
+    let done = false;
+    do {
+      const newName = this.newContractName + i;
+      if(!this.state.models.get(newName)){
+        this.createNewFile(this.startingWords, newName);
+        done = true
+        break;
+      }else{
+        console.log(newName + ' does exist')
+        if (i === 10){done = true}
       }
-    }
-    newNum === 0 ? newNum = '' : newNum = newNum.toString()
-    this.createNewFile(this.state.startingWords, 'new contract' + newNum)
+      i = i + 1;
+    } while (!done);    
   }
 
   closeTab = (name) => {
@@ -227,7 +225,7 @@ class MonacoWindow extends Component {
       if (tabNames.length > 0){
         this.handleFileSwitching(tabNames[0])
       }else{
-        this.createNewFile('# Welcome to the blockchain revolution', 'new contract');
+        this.createNewFile(this.startingWords,  this.newContractName + '1');
       }
     })
   }
