@@ -85,6 +85,13 @@ class Settings extends React.Component {
     );
   };
 
+  handleClose = () => {
+    this.toggleDrawer();
+  }
+
+  handleOpen = () => {
+  }
+
   render() {
     const { classes } = this.props;
     const { expanded } = this.state;
@@ -130,14 +137,12 @@ class Settings extends React.Component {
           ref={(ref) => { this.ref = ref }}
           anchor="top"
           open={this.state.open}
-          onClose={() => this.toggleDrawer()}
-          onOpen={() => this.toggleDrawer()}
+          onClose={() => this.handleClose()}
+          onOpen={() => this.handleOpen()}
         >
           <div
             tabIndex={0}
             role="button"
-            onClick={() => this.toggleDrawer()}
-            onKeyDown={() => this.toggleDrawer()}
           >
             {fullList}
           </div>

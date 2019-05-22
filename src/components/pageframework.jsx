@@ -134,7 +134,7 @@ class PageFramework extends React.Component {
       newContract: undefined,
       windowHeight: undefined,
       windowWidth: undefined,
-      ApiInfo: {status:'Offline', server:'http://localhost', port: '8080'},
+      ApiInfo: {status:'Offline', server:'http://135.23.243.199', port: '6565'},
       contractList: []
     };
 
