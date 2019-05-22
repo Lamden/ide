@@ -104,38 +104,37 @@ class MonacoWindow extends Component {
         this.monaco = monaco;
         this.editor = this.monaco.editor.create(document.getElementById("editor-container"), {automaticLayout: true});
         
-        //cookies.remove('openfiles');
+        cookies.remove('openfiles');
         this.newTab();
         
         this.props.setClick(this.clickController);
       })
   }
 
-  componentWillUnmount() {
-    cookies.removeChangeListener();
-  }
-
   componentDidUpdate(prevProps, prevState, snapshot){
+    console.log('updated')
     if (this.props.ApiInfo.status === 'Offline' || this.props.ApiInfo.status === 'Pending'){
       this.prevStatus = 'Offline';
     }
 
     if (this.prevStatus === 'Offline' && this.props.ApiInfo.status === 'Online'){
       this.prevStatus = 'Online';
-      const files = cookies.getAll();
-      if (files['openfiles']){
-        this.createNewFile(this.startingWords, this.newContractName + '1');
-        this.openCookieFiles(files['openfiles'])
-      }
+
     }
 
+
+    console.log(this.props.newContract)
+    console.log(prevProps.newContract)
+
     if (this.props.newContract && this.props.newContract !== prevProps.newContract){
+      console.log('opening')
       API.contract(this.props.ApiInfo, this.props.newContract[0])
-        .then(data => this.createNewFile(data.toString(), this.props.newContract[0]))
+      .then(data => this.createNewFile(data.name, data.code))
       }
   }
 
   clickController = (action) =>{
+    console.log('here in clickController')
     switch(action) {
       case "Lint":
         this.props.enqueueSnackbar('Checking contract for errors...', { variant: 'info' });
@@ -161,10 +160,14 @@ class MonacoWindow extends Component {
     this.createNewFile(value);
   }
 
-  createNewFile = (value, name) => {
+  createNewFile = (name, code) => {
     let models = this.state.models;
     if (!models.has(name)){
-      const newFile = this.monaco.editor.createModel(value, 'python');
+      console.log(name)
+      console.log(code)
+      console.log(this.monaco)
+      console.log(this.editor)
+      const newFile = this.monaco.editor.createModel(code, 'python');
       this.editor.setModel(newFile);
       models.set(name, newFile);
       this.setState({ models, currentTab: {name, id: newFile.id}})
@@ -202,7 +205,7 @@ class MonacoWindow extends Component {
     do {
       const newName = this.newContractName + i;
       if(!this.state.models.get(newName)){
-        this.createNewFile(this.startingWords, newName);
+        this.createNewFile(newName, this.startingWords);
         done = true
         break;
       }else{
@@ -225,7 +228,7 @@ class MonacoWindow extends Component {
       if (tabNames.length > 0){
         this.handleFileSwitching(tabNames[0])
       }else{
-        this.createNewFile(this.startingWords,  this.newContractName + '1');
+        this.createNewFile(this.newContractName + '1', this.startingWords,  );
       }
     })
   }

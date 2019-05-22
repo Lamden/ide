@@ -30,7 +30,7 @@ export function contract(apiInfo, contract){
     const ENDPOINT = '/contracts/';
     return new Promise (function(resolve, reject){
         fetch(apiURL(apiInfo, ENDPOINT) + contract)
-        .then(response => resolve (response.text()))
+        .then(response => resolve (response.json()))
         .catch((error) => {
             console.log(error);
           });

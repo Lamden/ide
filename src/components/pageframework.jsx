@@ -5,6 +5,7 @@ import { withStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
+import Button from '@material-ui/core/Button';
 import List from '@material-ui/core/List';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Typography from '@material-ui/core/Typography';
@@ -22,8 +23,9 @@ import CheckCircleOutline from '@material-ui/icons/CheckCircleOutline';
 import { fade } from '@material-ui/core/styles/colorManipulator';
 
 
-import MonacoEditor from "../components/monacoeditor"
-import ContractSearch from "../components/fragments/contractsearch"
+import Settings from "../components/settings";
+import MonacoEditor from "../components/monacoeditor";
+import ContractSearch from "../components/fragments/contractsearch";
 import * as API from '../js/contracting_api.ts';
 import Cookies from 'universal-cookie';
 
@@ -35,6 +37,9 @@ const drawerWidth = 240;
 const styles = theme => ({
   root: {
     display: 'flex',
+  },
+  grow: {
+    flexGrow: 1
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
@@ -144,7 +149,6 @@ class PageFramework extends React.Component {
     this.handleResize();
     window.addEventListener('resize', this.handleResize)
     this.connectToAPI();
-
   }
 
   componentWillUnmount() {
@@ -173,12 +177,12 @@ class PageFramework extends React.Component {
   setApiStatus = (status) => {
     let apiInfo = this.state.ApiInfo;
     apiInfo.status = 'Offline';
-    if (status === 'indeed'){
+    if (status === 'I\'m a teapot'){
       apiInfo.status = 'Online';
     }
     this.setState({ApiInfo: apiInfo}, () => {
       API.contracts(this.state.ApiInfo)
-        .then(data => data.map(contract => ({label: contract, value: contract})))
+        .then(data => data.contracts.map(contract => ({label: contract, value: contract})))
         .then(contractList => this.setState({contractList}));
     });
   }
@@ -195,18 +199,17 @@ class PageFramework extends React.Component {
     this.setState({ open: true, editorValue: 'Now this' });
   }
 
-  setNewValue = (contract) => {
+  handleSearchChoice = (contract) => {
     let openFiles = cookies.get('openfiles');
     if(!openFiles){
         cookies.set('openfiles', [contract])
-        this.setState({ newContract: [contract] })
     }else{
       if (openFiles.indexOf(contract) === -1){
         openFiles.push(contract)
-        cookies.set('openfiles', openFiles)
-        this.setState({ newContract: [contract] })
+        cookies.set('openfiles', openFiles) 
       }
-    }   
+    }
+    this.setState({ newContract: [contract] })
   }
 
   handleResize = () => this.setState({
@@ -214,12 +217,17 @@ class PageFramework extends React.Component {
     windowWidth: window.innerWidth
   });
 
+  handleOpenSettings = () => {
+    this.settingsDrawer.toggleDrawer();
+  }
+
   render() {
     const { classes, theme } = this.props;
 
     return (
       <div className={classes.root}>
         <CssBaseline />
+        <Settings onRef={child => this.settingsDrawer = child}/>
         <AppBar
           position="fixed"
           
@@ -242,8 +250,10 @@ class PageFramework extends React.Component {
               Lamden
             </Typography>
             <div className={classes.search}>
-              <ContractSearch ApiInfo={this.state.ApiInfo} selectedContract={this.setNewValue} contracts={this.state.contractList}/>
+              <ContractSearch ApiInfo={this.state.ApiInfo} selectedContract={this.handleSearchChoice} contracts={this.state.contractList}/>
             </div>
+            <div className={classes.grow} />
+            <Button color="inherit" onClick={() => this.handleOpenSettings()}>Settings</Button>
           </Toolbar>
         </AppBar>
         <Drawer
@@ -289,6 +299,7 @@ class PageFramework extends React.Component {
             </ListItem>
           </List>
         </Drawer>
+        
         <main className={classes.content}>
             <MonacoEditor 
               setClick={click => this.ClickController = click}
