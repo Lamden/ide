@@ -5,7 +5,7 @@ import { withStyles } from '@material-ui/core/styles';
 
 import Divider from '@material-ui/core/Divider';
 
-const styles = theme => ({
+const styles = ({
     root: {
         color: 'red',
         border: '2px solid lightgrey',
@@ -62,7 +62,7 @@ class ErrorBox extends Component {
     }
 
     render() {
-        const { classes, theme } = this.props
+        const { classes } = this.props
         const errors = this.sortedErrors();
         return (
             <div style={{

@@ -11,14 +11,6 @@ import Cookies from 'universal-cookie';
 
 const cookies = new Cookies();
 
-const waitFor = (ms) => new Promise(r => setTimeout(r, ms));
-
-async function asyncForEach(array, callback) {
-  for (let index = 0; index < array.length; index++) {
-    await callback(array[index], index, array);
-  }
-}
-
 const errorBoxHeight = 150;
 const appBarHeight = 100;
 const tabsHeight = 37;
@@ -105,7 +97,7 @@ class MonacoWindow extends Component {
         this.monaco = monaco;
         this.editor = this.monaco.editor.create(document.getElementById("editor-container"), {automaticLayout: true});
         
-        cookies.remove('openfiles');
+        //cookies.remove('openfiles');
         this.newTab();
         
         this.props.setClick(this.clickController);
@@ -142,6 +134,7 @@ class MonacoWindow extends Component {
         } catch (e) {
           this.props.enqueueSnackbar(e.message, { variant: 'error' });
         }
+        break;
       default:
         break;
     }
@@ -262,7 +255,7 @@ class MonacoWindow extends Component {
   }
 
   render() {
-    const { classes, theme } = this.props
+    const { classes } = this.props
 
     const tabs = []
 

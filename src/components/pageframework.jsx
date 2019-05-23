@@ -148,14 +148,14 @@ class PageFramework extends React.Component {
 
   componentDidMount() {
     this.handleResize();
-    window.addEventListener('resize', this.handleResize)
+    window.addEventListener('resize', this.handleResize);
 
-    let apiInfo = cookies.get('apiInfo');
+    cookies.remove('apiInfo');
+    let apiInfo = !cookies.get('apiInfo') ? {hostname: 'http:\\\\localhost', port: '8080'} : cookies.get('apiInfo');
     apiInfo.status = 'Offline';
-    apiInfo.hostname = apiInfo.hostname === undefined || apiInfo.hostname === '' ? 'http:\\\\localhost' : apiInfo.hostname;
-    apiInfo.port = apiInfo.port === undefined || apiInfo.port === '' ? '8080' : apiInfo.port;
 
     this.setState({ApiInfo: apiInfo}, () => {
+      cookies.set('apiInfo', apiInfo)
       this.connectToAPI();
     });
   }

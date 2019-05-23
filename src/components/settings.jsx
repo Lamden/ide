@@ -80,8 +80,8 @@ class Settings extends React.Component {
         name: ''
       };
 
-      this.hostname = cookies.get('apiInfo').hostname === '' ? 'http:\\\\localhost' : cookies.get('apiInfo').hostname;
-      this.port = cookies.get('apiInfo').port === '' ? '8080' : cookies.get('apiInfo').port;
+      this.hostname = cookies.get('apiInfo') ? cookies.get('apiInfo').hostname : 'http:\\\\localhost';
+      this.port = cookies.get('apiInfo') ? cookies.get('apiInfo').port : '8080';
   }
 
   componentDidMount() {
@@ -103,9 +103,9 @@ class Settings extends React.Component {
   };
 
   handleHostnameChange = name => event => {
-    let apiInfo = cookies.get('apiInfo');
-    apiInfo.hostname = event.target.value;
-    cookies.set('apiInfo', apiInfo);
+      let apiInfo = cookies.get('apiInfo')
+      apiInfo.hostname = event.target.value;
+      cookies.set('apiInfo', apiInfo);
   };
 
   handlePortChange = name => event => {
@@ -124,7 +124,7 @@ class Settings extends React.Component {
     this.toggleDrawer();
     this.props.retryAPI(cookies.get('apiInfo').hostname, cookies.get('apiInfo').port)
   }
-
+  
   handleOpen = () => {
   }
 
@@ -149,7 +149,7 @@ class Settings extends React.Component {
               className={classNames(classes.margin, classes.textField)}
               onChange={this.handleHostnameChange('hostname')}
               margin="normal"
-              defaultValue={cookies.get('apiInfo').hostname}
+              defaultValue={cookies.get('apiInfo') ? cookies.get('apiInfo').hostname : 'http:\\\\localhost'}
               helperText="blank for http:\\localhost"
             />
             <TextField
@@ -158,7 +158,7 @@ class Settings extends React.Component {
               className={classNames(classes.margin, classes.textField)}
               onChange={this.handlePortChange('port')}
               margin="normal"
-              defaultValue={cookies.get('apiInfo').port === '' ? '8080' : cookies.get('apiInfo').port }
+              defaultValue={cookies.get('apiInfo') ? cookies.get('apiInfo').port  : '8080' }
               helperText="blank for port 8080"
             />
           </ExpansionPanelDetails>

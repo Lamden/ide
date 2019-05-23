@@ -14,8 +14,6 @@ import MenuItem from '@material-ui/core/MenuItem';
 import CancelIcon from '@material-ui/icons/Cancel';
 import { emphasize } from '@material-ui/core/styles/colorManipulator';
 
-import * as API from '../../js/contracting_api.ts';
-
 const styles = theme => ({
   root: {
     flexGrow: 1,
