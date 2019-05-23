@@ -150,7 +150,6 @@ class PageFramework extends React.Component {
     this.handleResize();
     window.addEventListener('resize', this.handleResize);
 
-    cookies.remove('apiInfo');
     let apiInfo = !cookies.get('apiInfo') ? {hostname: 'http:\\\\localhost', port: '8080'} : cookies.get('apiInfo');
     apiInfo.status = 'Offline';
 
@@ -175,6 +174,7 @@ class PageFramework extends React.Component {
   }
 
   connectToAPI = () => {
+    this.props.enqueueSnackbar('Connecting to ' + this.state.ApiInfo.hostname + ':' + this.state.ApiInfo.port , { variant: 'info' });
     let apiInfo = this.state.ApiInfo;
     apiInfo.status = 'Connecting...';
     this.setState({ ApiInfo: apiInfo }, () => {
@@ -188,6 +188,7 @@ class PageFramework extends React.Component {
     let apiInfo = this.state.ApiInfo;
     if (status === 'I\'m a teapot'){
       apiInfo.status = 'Online';
+      this.props.enqueueSnackbar('Connected to API server!', { variant: 'success' });
       this.setState({ApiInfo: apiInfo}, () => {
         API.contracts(this.state.ApiInfo)
           .then(data => data.contracts.map(contract => ({label: contract, value: contract})))
@@ -200,11 +201,11 @@ class PageFramework extends React.Component {
 
   handleApiError = (error) => {
     if (error.message === 'Failed to fetch'){
-      error = 'Unable to connect to API endpoint ' + this.state.ApiInfo.hostname + ':' + this.state.ApiInfo.port;
+      this.props.enqueueSnackbar('Unable to connect to API endpoint ' + this.state.ApiInfo.hostname + ':' + this.state.ApiInfo.port + '. Check API settings.', { variant: 'error' });
+      return;
     }
     this.props.enqueueSnackbar(error, { variant: 'error' });
-    this.monacoEditor.parentErrors(error);
-    //
+
     let apiInfo = this.state.ApiInfo;
     apiInfo.status = 'Offline';
     this.setState({ApiInfo: apiInfo});
@@ -301,7 +302,7 @@ class PageFramework extends React.Component {
           </div>
           <Divider />
           <List>
-            <ListItem key='apistatus' title={'API Connection ' + this.state.ApiInfo.status}>
+            <ListItem key='apistatus' title={'API Connection ' + this.state.ApiInfo.status} onClick={() => this.connectToAPI()}>
               <ListItemIcon> 
                 <FiberManualRecord className={classNames({
                                                           [classes.statusOnline]: this.state.ApiInfo.status === 'Online',
