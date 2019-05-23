@@ -21,6 +21,7 @@ import FiberManualRecord from '@material-ui/icons/FiberManualRecord';
 import Publish from '@material-ui/icons/Publish';
 import CheckCircleOutline from '@material-ui/icons/CheckCircleOutline';
 import { fade } from '@material-ui/core/styles/colorManipulator';
+import { withSnackbar } from 'notistack';
 
 
 import Settings from "../components/settings";
@@ -134,7 +135,7 @@ class PageFramework extends React.Component {
       newContract: undefined,
       windowHeight: undefined,
       windowWidth: undefined,
-      ApiInfo: {status:'Offline', server:'http://135.23.243.199', port: '6565'},
+      ApiInfo: {},
       contractList: []
     };
 
@@ -148,43 +149,66 @@ class PageFramework extends React.Component {
   componentDidMount() {
     this.handleResize();
     window.addEventListener('resize', this.handleResize)
-    this.connectToAPI();
+
+    let apiInfo = cookies.get('apiInfo');
+    apiInfo.status = 'Offline';
+    apiInfo.hostname = apiInfo.hostname === undefined || apiInfo.hostname === '' ? 'http:\\\\localhost' : apiInfo.hostname;
+    apiInfo.port = apiInfo.port === undefined || apiInfo.port === '' ? '8080' : apiInfo.port;
+
+    this.setState({ApiInfo: apiInfo}, () => {
+      this.connectToAPI();
+    });
   }
 
   componentWillUnmount() {
     window.removeEventListener('resize', this.handleResize)
   }
 
-  changeApiServer = (newServer, port) => {
+  changeApiServer = (newHost, port) => {
+    cookies.set('apiInfo', {hostname: newHost, port: port})
     let apiInfo = this.state.ApiInfo;
-    apiInfo.server = newServer;
+    apiInfo.hostname = newHost;
     apiInfo.port = port;
     this.setState({ApiInfo: apiInfo}, () => {
-      this.connectToAPI(this.state.ApiInfo.server);
+      this.connectToAPI();
     });
   }
 
   connectToAPI = () => {
     let apiInfo = this.state.ApiInfo;
-    apiInfo.status = 'Pending';
+    apiInfo.status = 'Connecting...';
     this.setState({ ApiInfo: apiInfo }, () => {
         API.apicheck(this.state.ApiInfo)
           .then(data => this.setApiStatus(data))
-          .catch(e => this.setApiStatus(e))
+          .catch(e => this.handleApiError(e))
     });
   }
 
   setApiStatus = (status) => {
     let apiInfo = this.state.ApiInfo;
-    apiInfo.status = 'Offline';
     if (status === 'I\'m a teapot'){
       apiInfo.status = 'Online';
+      this.setState({ApiInfo: apiInfo}, () => {
+        API.contracts(this.state.ApiInfo)
+          .then(data => data.contracts.map(contract => ({label: contract, value: contract})))
+          .then(contractList => this.setState({contractList}))
+        });
+    }else{
+      this.handleApiError();
     }
-    this.setState({ApiInfo: apiInfo}, () => {
-      API.contracts(this.state.ApiInfo)
-        .then(data => data.contracts.map(contract => ({label: contract, value: contract})))
-        .then(contractList => this.setState({contractList}));
-    });
+  }
+
+  handleApiError = (error) => {
+    if (error.message === 'Failed to fetch'){
+      error = 'Unable to connect to API endpoint ' + this.state.ApiInfo.hostname + ':' + this.state.ApiInfo.port;
+    }
+    this.props.enqueueSnackbar(error, { variant: 'error' });
+    this.monacoEditor.parentErrors(error);
+    //
+    let apiInfo = this.state.ApiInfo;
+    apiInfo.status = 'Offline';
+    this.setState({ApiInfo: apiInfo});
+
   }
 
   handleDrawerOpen = () => {
@@ -227,7 +251,7 @@ class PageFramework extends React.Component {
     return (
       <div className={classes.root}>
         <CssBaseline />
-        <Settings onRef={child => this.settingsDrawer = child}/>
+        <Settings retryAPI={this.changeApiServer} onRef={ref => this.settingsDrawer = ref}/>
         <AppBar
           position="fixed"
           
@@ -281,7 +305,7 @@ class PageFramework extends React.Component {
               <ListItemIcon> 
                 <FiberManualRecord className={classNames({
                                                           [classes.statusOnline]: this.state.ApiInfo.status === 'Online',
-                                                          [classes.statusPending]: this.state.ApiInfo.status === 'Pending',
+                                                          [classes.statusPending]: this.state.ApiInfo.status === 'Connecting...',
                                                           [classes.statusOffline]: this.state.ApiInfo.status === 'Offline'}
                                                         )}
                 />
@@ -302,6 +326,7 @@ class PageFramework extends React.Component {
         
         <main className={classes.content}>
             <MonacoEditor 
+              onRef={ref => this.monacoEditor = ref}
               setClick={click => this.ClickController = click}
               ApiInfo={this.state.ApiInfo}
               value={this.state.editorValue}
@@ -321,4 +346,4 @@ PageFramework.propTypes = {
   theme: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(PageFramework);
+export default withStyles(styles, { withTheme: true })(withSnackbar(PageFramework));

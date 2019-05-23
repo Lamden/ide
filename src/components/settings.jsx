@@ -3,10 +3,16 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import SwipeableDrawer from '@material-ui/core/SwipeableDrawer';
 import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
+import classNames from 'classnames';
 import MuiExpansionPanel from '@material-ui/core/ExpansionPanel';
 import MuiExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import MuiExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import Typography from '@material-ui/core/Typography';
+
+import Cookies from 'universal-cookie';
+const cookies = new Cookies();
+
 
 const ExpansionPanel = withStyles({
   root: {
@@ -54,6 +60,14 @@ const styles = {
   fullList: {
     width: 'auto',
   },
+  buttons: {
+    textAlign: 'center',
+    padding: '10px',
+  },
+  button: {
+    margin: '10px',
+  }
+
 };
 
 class Settings extends React.Component {
@@ -61,8 +75,13 @@ class Settings extends React.Component {
     super(props);
       this.state = {
         open: false,
-        expanded: "panel1"
+        expanded: "panel1",
+        port: '',
+        name: ''
       };
+
+      this.hostname = cookies.get('apiInfo').hostname === '' ? 'http:\\\\localhost' : cookies.get('apiInfo').hostname;
+      this.port = cookies.get('apiInfo').port === '' ? '8080' : cookies.get('apiInfo').port;
   }
 
   componentDidMount() {
@@ -70,12 +89,10 @@ class Settings extends React.Component {
   }
 
   toggleDrawer = () =>{
-    console.log('calling')
     this.setState({
       open: !this.state.open,
     });
   }
-
 
   handleChange = panel => (event, expanded) => {
     this.setState(
@@ -85,8 +102,27 @@ class Settings extends React.Component {
     );
   };
 
+  handleHostnameChange = name => event => {
+    let apiInfo = cookies.get('apiInfo');
+    apiInfo.hostname = event.target.value;
+    cookies.set('apiInfo', apiInfo);
+  };
+
+  handlePortChange = name => event => {
+    let apiInfo = cookies.get('apiInfo');
+    apiInfo.port = event.target.value;
+    cookies.set('apiInfo', apiInfo);
+  };
+
+
   handleClose = () => {
+    let apiInfo = cookies.get('apiInfo');   
+    apiInfo.hostname = apiInfo.hostname === '' ? 'http:\\\\localhost' : apiInfo.hostname;
+    apiInfo.hostname = apiInfo.hostname.indexOf('http:\\') === 0 || apiInfo.hostname.indexOf('https:\\')  === 0 ? apiInfo.hostname : 'http:\\\\' + apiInfo.hostname;
+    apiInfo.port = apiInfo.port === '' ? '8080' : apiInfo.port;
+    cookies.set('apiInfo', apiInfo);
     this.toggleDrawer();
+    this.props.retryAPI(cookies.get('apiInfo').hostname, cookies.get('apiInfo').port)
   }
 
   handleOpen = () => {
@@ -107,11 +143,24 @@ class Settings extends React.Component {
             <Typography>API Server</Typography>
           </ExpansionPanelSummary>
           <ExpansionPanelDetails>
-            <Typography>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse malesuada lacus
-              ex, sit amet blandit leo lobortis eget. Lorem ipsum dolor sit amet, consectetur
-              adipiscing elit. Suspendisse malesuada lacus ex, sit amet blandit leo lobortis eget.
-            </Typography>
+            <TextField
+              id="api-hostname"
+              label="HostName"
+              className={classNames(classes.margin, classes.textField)}
+              onChange={this.handleHostnameChange('hostname')}
+              margin="normal"
+              defaultValue={cookies.get('apiInfo').hostname}
+              helperText="blank for http:\\localhost"
+            />
+            <TextField
+              id="api-port"
+              label="Port"
+              className={classNames(classes.margin, classes.textField)}
+              onChange={this.handlePortChange('port')}
+              margin="normal"
+              defaultValue={cookies.get('apiInfo').port === '' ? '8080' : cookies.get('apiInfo').port }
+              helperText="blank for port 8080"
+            />
           </ExpansionPanelDetails>
         </ExpansionPanel>
         <ExpansionPanel
@@ -128,13 +177,18 @@ class Settings extends React.Component {
             </Typography>
           </ExpansionPanelDetails>
         </ExpansionPanel>
+        <div className={classes.buttons}>
+          <Button className={classes.button} variant="contained" color="primary" onClick={() => this.handleClose()}>Save</Button>
+          <Button className={classes.button} variant="contained"  onClick={() => this.handleClose()}>Cancel</Button>
+        </div>
+        
       </div>
     );
 
     return (
       <div>
         <SwipeableDrawer
-          ref={(ref) => { this.ref = ref }}
+          
           anchor="top"
           open={this.state.open}
           onClose={() => this.handleClose()}

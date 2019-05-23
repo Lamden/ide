@@ -99,6 +99,7 @@ class MonacoWindow extends Component {
   }
 
   componentDidMount() {
+    this.props.onRef(this);
     import("monaco-editor")
       .then( monaco => {
         this.monaco = monaco;
@@ -112,7 +113,6 @@ class MonacoWindow extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot){
-    console.log('updated')
     if (this.props.ApiInfo.status === 'Offline' || this.props.ApiInfo.status === 'Pending'){
       this.prevStatus = 'Offline';
     }
@@ -122,19 +122,14 @@ class MonacoWindow extends Component {
 
     }
 
-
-    console.log(this.props.newContract)
-    console.log(prevProps.newContract)
-
     if (this.props.newContract && this.props.newContract !== prevProps.newContract){
-      console.log('opening')
       API.contract(this.props.ApiInfo, this.props.newContract[0])
       .then(data => this.createNewFile(data.name, data.code))
+      .catch(e => this.setState({errors: e}));
       }
   }
 
   clickController = (action) =>{
-    console.log('here in clickController')
     switch(action) {
       case "Lint":
         this.props.enqueueSnackbar('Checking contract for errors...', { variant: 'info' });
@@ -163,10 +158,6 @@ class MonacoWindow extends Component {
   createNewFile = (name, code) => {
     let models = this.state.models;
     if (!models.has(name)){
-      console.log(name)
-      console.log(code)
-      console.log(this.monaco)
-      console.log(this.editor)
       const newFile = this.monaco.editor.createModel(code, 'python');
       this.editor.setModel(newFile);
       models.set(name, newFile);
@@ -209,7 +200,6 @@ class MonacoWindow extends Component {
         done = true
         break;
       }else{
-        console.log(newName + ' does exist')
         if (i === 10){done = true}
       }
       i = i + 1;
@@ -231,6 +221,10 @@ class MonacoWindow extends Component {
         this.createNewFile(this.newContractName + '1', this.startingWords,  );
       }
     })
+  }
+
+  parentErrors = (error) => {
+    this.setState({ errors: [error] });
   }
 
   handleErrors = (errors) => {

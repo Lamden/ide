@@ -1,6 +1,6 @@
 
 function apiURL (apiInfo, ENDPOINT){
-    if (apiInfo) { return apiInfo.server + ':' + apiInfo.port + ENDPOINT;}     
+    if (apiInfo) { return apiInfo.hostname + ':' + apiInfo.port + ENDPOINT;}     
 }
 
 export function apicheck(apiInfo){
@@ -21,7 +21,7 @@ export function contracts(apiInfo){
         fetch(apiURL(apiInfo, ENDPOINT))
         .then(response => resolve (response.json()))
         .catch((error) => {
-            console.log(error);
+            reject(error);
           });
     });
 }
@@ -32,7 +32,7 @@ export function contract(apiInfo, contract){
         fetch(apiURL(apiInfo, ENDPOINT) + contract)
         .then(response => resolve (response.json()))
         .catch((error) => {
-            console.log(error);
+            reject(error);
           });
     });
 }
