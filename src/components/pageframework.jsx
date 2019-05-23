@@ -135,7 +135,7 @@ class PageFramework extends React.Component {
       newContract: undefined,
       windowHeight: undefined,
       windowWidth: undefined,
-      ApiInfo: {},
+      ApiInfo: {status: 'Offline'},
       contractList: []
     };
 
@@ -200,15 +200,16 @@ class PageFramework extends React.Component {
   }
 
   handleApiError = (error) => {
-    if (error.message === 'Failed to fetch'){
-      this.props.enqueueSnackbar('Unable to connect to API endpoint ' + this.state.ApiInfo.hostname + ':' + this.state.ApiInfo.port + '. Check API settings.', { variant: 'error' });
-      return;
-    }
-    this.props.enqueueSnackbar(error, { variant: 'error' });
-
     let apiInfo = this.state.ApiInfo;
     apiInfo.status = 'Offline';
-    this.setState({ApiInfo: apiInfo});
+
+    this.setState({ApiInfo: apiInfo}, () => { 
+      if (error.message === 'Failed to fetch'){
+        this.props.enqueueSnackbar('Unable to connect to API endpoint ' + this.state.ApiInfo.hostname + ':' + this.state.ApiInfo.port + '. Check API settings.', { variant: 'error' });
+        return;
+      }
+      this.props.enqueueSnackbar(error, { variant: 'error' });
+    });
 
   }
 
