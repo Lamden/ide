@@ -228,33 +228,32 @@ class MonacoWindow extends Component {
   }
 
   handleErrors = (errors) => {
+    console.log(errors)
+    let errorsObj = {};
     try{
-      const test = JSON.parse(errors);
-    } catch (e) {
-      this.props.enqueueSnackbar('Error: Unexpected API Result', { variant: 'error' });
-      this.setState({ errors: [e.message] });
+      errorsObj = JSON.parse(errors)      
+    }catch (e){
+      this.setState({ errors: [e]});
+      this.props.enqueueSnackbar('Errors Found!', { variant: 'error' });
       return
     }
+      
+    console.log(errorsObj)
 
-    if (errors === 'null'){
+    if (!errorsObj.violations){
       this.setState({ errors: ['ok'] });
-      this.props.enqueueSnackbar('Contract has 0 Errors!', { variant: 'success' });
+      if (errorsObj.success){
+        this.props.enqueueSnackbar('Contract successfully submitted!', { variant: 'success' });
+      }else{
+        this.props.enqueueSnackbar('Contract has 0 Errors!', { variant: 'success' });
+
+      }
       return
     }
 
-    if (errors === 'success!'){
-      this.setState({ errors: ['success!'] });
-      this.props.enqueueSnackbar('Contact Submitted!', { variant: 'success' });
-      return
-    }
+    this.setState({ errors: errorsObj.violations});
+    this.props.enqueueSnackbar(errorsObj.violations.length + ' Error(s) Found!', { variant: 'error' });
 
-    if (JSON.parse(errors).error === undefined){
-      this.setState({ errors: JSON.parse(errors.toString()) });
-      this.props.enqueueSnackbar('Errors Found!', { variant: 'error' });
-    }else {
-      this.setState({ errors: [JSON.parse(errors).error]});
-      this.props.enqueueSnackbar('Errors Found!', { variant: 'error' });
-    }
   }
 
   isTabSeleted = (model) => {
