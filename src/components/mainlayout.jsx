@@ -9,7 +9,11 @@ import { SnackbarProvider } from 'notistack';
 
 const MainLayout = ({ children }) => {
   return (
-    <SnackbarProvider>
+    <SnackbarProvider
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+      }}>
       <PageFramework />
     </SnackbarProvider>
     )

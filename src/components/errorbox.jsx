@@ -8,8 +8,9 @@ import Divider from '@material-ui/core/Divider';
 const styles = ({
     root: {
         color: 'red',
-        border: '2px solid lightgrey',
         backgroundColor: '#E4ECF0',
+        width: '100%',
+        height: '100%'
     },
     heading: {
         padding: '5px',
@@ -66,7 +67,7 @@ class ErrorBox extends Component {
         const errors = this.sortedErrors();
         return (
             <div style={{
-                    width: this.props.width ? this.props.width : '500px', 
+                    
                     height: this.props.height
                 }}
                 className={classNames(classes.root)}>

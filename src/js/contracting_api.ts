@@ -27,9 +27,31 @@ export function contracts(apiInfo){
 }
 
 export function contract(apiInfo, contract){
-    const ENDPOINT = '/contracts/';
+    const ENDPOINT = '/contracts/' + contract;
     return new Promise (function(resolve, reject){
-        fetch(apiURL(apiInfo, ENDPOINT) + contract)
+        fetch(apiURL(apiInfo, ENDPOINT))
+        .then(response => resolve (response.json()))
+        .catch((error) => {
+            reject(error);
+          });
+    });
+}
+
+export function methods(apiInfo, contract){
+    const ENDPOINT = '/contracts/' + contract + '/methods';
+    return new Promise (function(resolve, reject){
+        fetch(apiURL(apiInfo, ENDPOINT))
+        .then(response => resolve (response.json()))
+        .catch((error) => {
+            reject(error);
+          });
+    });
+}
+
+export function variables(apiInfo, contract){
+    const ENDPOINT = '/contracts/' + contract + '/variable';
+    return new Promise (function(resolve, reject){
+        fetch(apiURL(apiInfo, ENDPOINT))
         .then(response => resolve (response.json()))
         .catch((error) => {
             reject(error);
@@ -46,7 +68,7 @@ export function lint(apiInfo, name, code){
         })
         .then(response => resolve (response.text()))
         .catch((error) => {
-            console.log(error);
+            reject(error);
           });
     });
 }
@@ -60,7 +82,7 @@ export function submit_contract(apiInfo, name, code){
         })
         .then(response => resolve (response.text()))
         .catch((error) => {
-            console.log(error);
+            reject(error);
           });
     });
 }

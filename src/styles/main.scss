@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i');
 
 // Lamden colors
-$color-azure: #3B42C7;
+$color-azure: #888eff;
 $color-azure: #ff6161;
 $color-black: #000000;
 $color-blue: #5368E7;
@@ -37,7 +37,7 @@ $color-error: #FF0000;
 $color-nav: #1F163D;
 $color-nav-dropdown: #45387F;
 $color-quote: $color-blue;
-$color-table-gradient: #211A53;
+$color-table-gradient: rgb(33, 26, 83);
 $color-table-gradient-second: #1F174A;
 
 // Text-styles
@@ -64,6 +64,10 @@ $grid-breakpoints-v: (
 ) !default;
 
 
+html, body{
+  height:100%;
+}
+
 html {
   -ms-text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
@@ -87,6 +91,13 @@ body {
   background-color: white!important;
 }
 
+.monaco-editor {
+  height: 99%!important;
+
+  .overflow-guard{
+    height: 99%!important;
+  }
+}
 
 // Import components
 @import "./components/_monacowindow.scss";

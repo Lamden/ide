@@ -4,42 +4,41 @@ import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
 import { withSnackbar } from 'notistack';
 import { Close, FiberNewOutlined } from '@material-ui/icons';
+import Paper from '@material-ui/core/Paper';
 
 import * as API from '../js/contracting_api.ts';
 import ErrorBox from "../components/errorbox";
+import MetaContract from "../components/metacontract";
 import Cookies from 'universal-cookie';
 
 const cookies = new Cookies();
 
-const errorBoxHeight = 150;
-const appBarHeight = 100;
 const tabsHeight = 37;
 
 const EditorContainer = (props) => {
-  return <div
+  return <Paper
           style={{
             width: props.width ? props.width : '500px', 
-            height: props.height ? props.height - (errorBoxHeight + appBarHeight + tabsHeight): '500px',
-            borderTop: '2px solid #45387F', paddingTop: '10px'}}
-          id="editor-container"></div>
+            height: props.height ? props.height: '500px',
+            borderTop: '2px solid #45387F', paddingTop: '10px', margin: ' 0 15px 15px 15px'}}
+          id="editor-container"></Paper>
 };
 
 const styles = theme => ({
   root: {
-    
+    display: 'block',
     height: tabsHeight + 'px',
     marginTop: '4.25rem'
+  },
+  tabRow:{
+
   },
   tabs: {
     display: 'inline',
     height: tabsHeight + 'px',
-    backgroundColor: 'white',
-    borderWidth: '2px 2px 0px 2px',
-    borderRadius: '10px 10px 0 0',
-    borderStyle: 'solid',
     borderColor: '#45387F',
-    margin: '0 2px',
-    padding: '0 12px',
+    padding: '5px 12px',
+    lineHeight: '32px',
     '&:focus': {outline:'0'}
   },
   tabButton: {
@@ -48,16 +47,17 @@ const styles = theme => ({
     '&:focus': {outline:'1px'}
   },
   tabSelected: {
-    backgroundColor: '#E4ECF0',
+    backgroundColor: '#3b42c785',
     fontWeight: 'bold',
+  },
+  tabUnselected: {
+    backgroundColor: '#3b42c730',
   },
   tabClose: {
     height: '16px',
     position: 'relative',
     top: '3px',
     left: '8px',
-    border: '1px solid grey',
-    borderRadius: '50%',
     width: '16px',
   },
   newTab:{
@@ -68,8 +68,11 @@ const styles = theme => ({
     margin: '-12px 0',
     fontSize: '269%'
   },
-  tabUnselected: {
-    backgroundColor: 'white'
+  errorBoxRow:{
+    height: '80%'
+  },
+  editorRow: {
+    display: 'flex'
   }
 });
 
@@ -97,9 +100,14 @@ class MonacoWindow extends Component {
         this.monaco = monaco;
         this.editor = this.monaco.editor.create(document.getElementById("editor-container"), {automaticLayout: true});
         
-        //cookies.remove('openfiles');
+        cookies.remove('openFiles');
+
+        if (!cookies.get('openfiles')){
+          cookies.set('openfiles', [])
+        }
+
         this.newTab();
-        
+
         this.props.setClick(this.clickController);
       })
   }
@@ -154,7 +162,12 @@ class MonacoWindow extends Component {
       const newFile = this.monaco.editor.createModel(code, 'python');
       this.editor.setModel(newFile);
       models.set(name, newFile);
-      this.setState({ models, currentTab: {name, id: newFile.id}})
+      this.setState({ models, currentTab: {name, id: newFile.id}}, () => {
+        API.methods(this.props.ApiInfo, name)
+        .then(data => !data.error ? this.setState({methods: data.methods}) : null);
+        API.variables(this.props.ApiInfo, name)
+        .then(data => !data.error ? this.setState({variables: data.variables}) : null);
+      });
     }else{     
       this.handleFileSwitching(name);
     }
@@ -166,7 +179,10 @@ class MonacoWindow extends Component {
       this.editor.setModel(model);
       this.setState({currentTab: {name, id: model['id']}})
     }
+  }
 
+  getCurretMethods = () => {
+    
   }
 
   openCookieFiles = async (openfiles) => {
@@ -221,7 +237,6 @@ class MonacoWindow extends Component {
   }
 
   handleErrors = (errors) => {
-    console.log(errors)
     let errorsObj = {};
     try{
       errorsObj = JSON.parse(errors)      
@@ -230,8 +245,6 @@ class MonacoWindow extends Component {
       this.props.enqueueSnackbar('Errors Found!', { variant: 'error' });
       return
     }
-      
-    console.log(errorsObj)
 
     if (!errorsObj.violations){
       this.setState({ errors: ['ok'] });
@@ -263,7 +276,8 @@ class MonacoWindow extends Component {
       tabs.push(
                   <div className={classNames(classes.tabs, {
                         [classes.tabSelected]: this.isTabSeleted(value),
-                        [classes.tabUnselected]: !this.isTabSeleted(value)})} key={index}>
+                        [classes.tabUnselected]: !this.isTabSeleted(value)})}
+                        key={index}>
                     <button className={classNames(classes.tabButton)}
                             onClick={() =>  this.handleFileSwitching(index)}> {index} </button>
                     <Close className={classNames(classes.tabClose)} 
@@ -273,14 +287,29 @@ class MonacoWindow extends Component {
     }
       return (
         <div className={classNames(classes.root)}>
+          <div className={classNames(classes.tabRow)}>
             <span>
                 <FiberNewOutlined onClick={() =>  this.newTab()} className={classNames(classes.newTab)} />
             </span>
             <span>
               {tabs}
             </span>
-            <EditorContainer width={this.props.drawerOpen ? this.props.width : this.props.width - 73} height={this.props.height} className="monaco-window" />
-            <ErrorBox width={this.props.drawerOpen ? this.props.width - 12 : this.props.width - 85} height={errorBoxHeight} errors={this.state.errors} />
+          </div>
+          <div className={classNames(classes.editorRow)}> 
+              <span>
+                <EditorContainer width={this.props.drawerOpen ? this.props.width : this.props.width - 73} height={this.props.height * 0.65} className="monaco-window" />
+              </span>
+              <span>
+                <MetaContract 
+                  methods={this.state.methods}
+                  variables={this.state.variables}
+                  height={this.props.height * 0.65}
+                />
+              </span>
+            </div>
+            <div className={classNames(classes.errorBoxRow)}>
+            <ErrorBox errors={this.state.errors} />
+            </div>
         </div>
       );
   }

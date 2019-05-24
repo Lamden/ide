@@ -186,7 +186,7 @@ class PageFramework extends React.Component {
 
   setApiStatus = (status) => {
     let apiInfo = this.state.ApiInfo;
-    if (status === 'I\'m a teapot'){
+    if (status === 'indeed'){
       apiInfo.status = 'Online';
       this.props.enqueueSnackbar('Connected to API server!', { variant: 'success' });
       this.setState({ApiInfo: apiInfo}, () => {
@@ -203,7 +203,11 @@ class PageFramework extends React.Component {
     let apiInfo = this.state.ApiInfo;
     apiInfo.status = 'Offline';
 
-    this.setState({ApiInfo: apiInfo}, () => { 
+    this.setState({ApiInfo: apiInfo}, () => {
+      if (!error){
+        this.props.enqueueSnackbar('Unknown API Server Error', { variant: 'error' });
+        return
+      } 
       if (error.message === 'Failed to fetch'){
         this.props.enqueueSnackbar('Unable to connect to API endpoint ' + this.state.ApiInfo.hostname + ':' + this.state.ApiInfo.port + '. Check API settings.', { variant: 'error' });
         return;
@@ -333,10 +337,11 @@ class PageFramework extends React.Component {
               ApiInfo={this.state.ApiInfo}
               value={this.state.editorValue}
               newContract={this.state.newContract}
-              width={this.state.open ? this.state.windowWidth - drawerWidth : this.state.windowWidth}
+              width={this.state.open ? ((this.state.windowWidth - drawerWidth) * 0.75) : this.state.windowWidth * 0.75}
               height={this.state.windowHeight}
               drawerOpen = {this.state.open}
-              action={this.editorHandler}/>
+              action={this.editorHandler}
+            />
         </main>
       </div>
     );
