@@ -65,7 +65,7 @@ const styles = theme => ({
     top: '6px',
     width: '43px',
     padding: '0',
-    margin: '-12px 0',
+    margin: '-12px 0 -12px 11px',
     fontSize: '269%'
   },
   errorBoxRow:{
