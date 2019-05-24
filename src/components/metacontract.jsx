@@ -5,14 +5,18 @@ import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 
 import { Input } from '@material-ui/icons';
-import TextField from '@material-ui/core/TextField';
+import { TextField, Paper } from '@material-ui/core';
+
+
 
 
 const styles = theme => ({
     root: {
         color: '#512354',
         width: '100%',
-        overflowY: 'auto'
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        paddingRight: '15px',
     },
     textField: {
         marginLeft: '5px',
@@ -23,6 +27,9 @@ const styles = theme => ({
         padding:' 5px',
         margin: '5px',
         backgroundColor: '#e8edfd',
+      },
+      headings:{
+        marginTop: '0',
       },
       methodRow: {
         color: '#512354',
@@ -38,6 +45,12 @@ const styles = theme => ({
       },
       runIcon: {
           
+      },
+      paperBox: {
+          margin: '0 5px 10px',
+          padding: '0 5px',
+          borderTop: '2px solid #45387F',
+
       }
 });
 
@@ -51,7 +64,8 @@ class MetaContract extends Component {
                 style={{
                     height: this.props.height
                 }}>
-                <h2>Methods</h2>
+                <Paper className={classNames(classes.paperBox)}>
+                <h2 className={classNames(classes.headings)}>Methods</h2>
                 {this.props.methods ?
                     this.props.methods.map(function(method, methodIndex){
                         if (method.name !== "____"){
@@ -76,16 +90,17 @@ class MetaContract extends Component {
                         
                         
                     })
-                : null }
-                
-
+                : 'None' }
+                </Paper>
+                <Paper className={classNames(classes.paperBox)}>
                 <h2>Variables</h2>
                 {this.props.variables ?
                     this.props.variables.map(function(variable, variableIndex){
                         return null
                         
                     })
-                : null }
+                : 'None' }
+                </Paper>
 
             </div>
         );

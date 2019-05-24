@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
 import { withSnackbar } from 'notistack';
-import { Close, FiberNewOutlined } from '@material-ui/icons';
+import { Close, Add } from '@material-ui/icons';
 import Paper from '@material-ui/core/Paper';
 
 import * as API from '../js/contracting_api.ts';
@@ -20,7 +20,7 @@ const EditorContainer = (props) => {
           style={{
             width: props.width ? props.width : '500px', 
             height: props.height ? props.height: '500px',
-            borderTop: '2px solid #45387F', paddingTop: '10px', margin: ' 0 15px 15px 15px'}}
+            borderTop: '2px solid #45387F', paddingTop: '10px', margin: '0px 4px 15px'}}
           id="editor-container"></Paper>
 };
 
@@ -38,6 +38,7 @@ const styles = theme => ({
     height: tabsHeight + 'px',
     borderColor: '#45387F',
     padding: '5px 12px',
+    marginRight: '1px',
     lineHeight: '32px',
     '&:focus': {outline:'0'}
   },
@@ -63,16 +64,17 @@ const styles = theme => ({
   newTab:{
     position: 'relative',
     top: '6px',
-    width: '43px',
-    padding: '0',
-    margin: '-12px 0 -12px 11px',
-    fontSize: '269%'
+    margin: '0 6px 0 19px',
+    fill: '#512354',
   },
   errorBoxRow:{
     height: '80%'
   },
   editorRow: {
     display: 'flex'
+  },
+  metaBox:{
+    width: '100%',
   }
 });
 
@@ -289,7 +291,7 @@ class MonacoWindow extends Component {
         <div className={classNames(classes.root)}>
           <div className={classNames(classes.tabRow)}>
             <span>
-                <FiberNewOutlined onClick={() =>  this.newTab()} className={classNames(classes.newTab)} />
+                <Add onClick={() =>  this.newTab()} className={classNames(classes.newTab)} />
             </span>
             <span>
               {tabs}
@@ -299,7 +301,7 @@ class MonacoWindow extends Component {
               <span>
                 <EditorContainer width={this.props.drawerOpen ? this.props.width : this.props.width - 73} height={this.props.height * 0.65} className="monaco-window" />
               </span>
-              <span>
+              <span className={classNames(classes.metaBox)}>
                 <MetaContract 
                   methods={this.state.methods}
                   variables={this.state.variables}
