@@ -1,62 +1,30 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
-import SwipeableDrawer from '@material-ui/core/SwipeableDrawer';
+import React, { useState, useEffect } from 'react';
+import { makeStyles } from '@material-ui/core/styles';
+import Drawer from '@material-ui/core/Drawer';
 import Button from '@material-ui/core/Button';
+
 import TextField from '@material-ui/core/TextField';
 import classNames from 'classnames';
-import MuiExpansionPanel from '@material-ui/core/ExpansionPanel';
-import MuiExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
-import MuiExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import Typography from '@material-ui/core/Typography';
 
-import Cookies from 'universal-cookie';
-const cookies = new Cookies();
+import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
+import * as API from '../js/contracting_api.ts';
 
-const ExpansionPanel = withStyles({
+const useStyles = makeStyles(theme => ({
   root: {
-    border: '1px solid rgba(0,0,0,.125)',
-    boxShadow: 'none',
-    '&:not(:last-child)': {
-      borderBottom: 0,
-    },
-    '&:before': {
-      display: 'none',
-    },
+    width: '100%',
   },
-  expanded: {
-    margin: 'auto',
+  heading: {
+    fontSize: theme.typography.pxToRem(15),
+    fontWeight: theme.typography.fontWeightRegular,
   },
-})(MuiExpansionPanel);
-
-const ExpansionPanelSummary = withStyles({
-  root: {
-    backgroundColor: 'rgba(0,0,0,.03)',
-    borderBottom: '1px solid rgba(0,0,0,.125)',
-    marginBottom: -1,
-    minHeight: 56,
-    '&$expanded': {
-      minHeight: 56,
-    },
+  list: {
+    width: 250,
   },
-  content: {
-    '&$expanded': {
-      margin: '12px 0',
-    },
-  },
-  expanded: {},
-})(props => <MuiExpansionPanelSummary {...props} />);
-
-ExpansionPanelSummary.muiName = 'ExpansionPanelSummary';
-
-const ExpansionPanelDetails = withStyles(theme => ({
-  root: {
-    padding: theme.spacing.unit * 2,
-  },
-}))(MuiExpansionPanelDetails);
-
-const styles = {
   fullList: {
     width: 'auto',
   },
@@ -67,147 +35,120 @@ const styles = {
   button: {
     margin: '10px',
   }
+}));
 
-};
+function Settings(props) {
+  const classes = useStyles();
+  const [initialized, setInitialized] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [savedApiInfo, setSavedApiInfo] = useState(false);
+  
 
-class Settings extends React.Component {
-  constructor(props) { 
-    super(props);
-      this.state = {
-        open: false,
-        expanded: "panel1",
-        port: '',
-        name: ''
-      };
+  useEffect(() => {
+    if (!initialized) {
+      setSavedApiInfo(API.getApiInfo())
+      setInitialized(true);
+    }
+  });
 
-      this.hostname = cookies.get('apiInfo') ? cookies.get('apiInfo').hostname : 'http:\\\\localhost';
-      this.port = cookies.get('apiInfo') ? cookies.get('apiInfo').port : '8080';
-  }
+  useEffect(() => {
+      setOpen(props.openSettings)
+  },[props.openSettings]);
 
-  componentDidMount() {
-    this.props.onRef(this);
-  }
 
-  toggleDrawer = () =>{
-    this.setState({
-      open: !this.state.open,
-    });
-  }
-
-  handleChange = panel => (event, expanded) => {
-    this.setState(
-      {
-        expanded: expanded ? panel : false
-      }
-    );
-  };
-
-  handleHostnameChange = name => event => {
-      let apiInfo = cookies.get('apiInfo')
+  const handleHostnameChange = () => event => {
+      let apiInfo = API.getApiInfo();
       apiInfo.hostname = event.target.value;
-      cookies.set('apiInfo', apiInfo);
+      API.setApiInfo(apiInfo);
   };
 
-  handlePortChange = name => event => {
-    let apiInfo = cookies.get('apiInfo');
+  const handlePortChange = () => event => {
+    let apiInfo = API.getApiInfo();
     apiInfo.port = event.target.value;
-    cookies.set('apiInfo', apiInfo);
+    API.setApiInfo(apiInfo);
   };
 
 
-  handleClose = () => {
-    let apiInfo = cookies.get('apiInfo');   
+  function handleClose() {
+    let apiInfo = API.getApiInfo(); 
     apiInfo.hostname = apiInfo.hostname === '' ? 'http:\\\\localhost' : apiInfo.hostname;
     apiInfo.hostname = apiInfo.hostname.indexOf('http:\\') === 0 || apiInfo.hostname.indexOf('https:\\')  === 0 ? apiInfo.hostname : 'http:\\\\' + apiInfo.hostname;
     apiInfo.port = apiInfo.port === '' ? '8080' : apiInfo.port;
-    cookies.set('apiInfo', apiInfo);
-    this.toggleDrawer();
-    this.props.retryAPI(cookies.get('apiInfo').hostname, cookies.get('apiInfo').port)
-  }
-  
-  handleOpen = () => {
+    API.setApiInfo(apiInfo);
+    if(apiInfo === savedApiInfo){ props.connectToAPI(); }
+    setSavedApiInfo(apiInfo);
+    toggleDrawer();
   }
 
-  render() {
-    const { classes } = this.props;
-    const { expanded } = this.state;
+  function handleCloseCancel() {
+    API.setApiInfo(savedApiInfo);
+    toggleDrawer();
+  }
 
-    const fullList = (
-      <div className={classes.fullList}>
-        <ExpansionPanel
-          square
-          expanded={expanded === 'panel1'}
-          onChange={this.handleChange('panel1')}
+  function toggleDrawer() {
+    props.toggleSettings();
+  };
+
+  const fullList = side => (
+    <div className={classes.fullList}>
+      <ExpansionPanel defaultExpanded={true}>
+        <ExpansionPanelSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel1a-content"
+          id="panel1a-header"
         >
-          <ExpansionPanelSummary>
-            <Typography>API Server</Typography>
-          </ExpansionPanelSummary>
-          <ExpansionPanelDetails>
-            <TextField
+          <Typography className={classes.heading}>Contract API Server Information</Typography>
+        </ExpansionPanelSummary>
+        <ExpansionPanelDetails>
+          <TextField
               id="api-hostname"
               label="HostName"
               className={classNames(classes.margin, classes.textField)}
-              onChange={this.handleHostnameChange('hostname')}
+              onChange={handleHostnameChange()}
               margin="normal"
-              defaultValue={cookies.get('apiInfo') ? cookies.get('apiInfo').hostname : 'http:\\\\localhost'}
+              defaultValue={ API.getApiInfo().hostname }
               helperText="blank for http:\\localhost"
             />
             <TextField
               id="api-port"
               label="Port"
               className={classNames(classes.margin, classes.textField)}
-              onChange={this.handlePortChange('port')}
+              onChange={handlePortChange()}
               margin="normal"
-              defaultValue={cookies.get('apiInfo') ? cookies.get('apiInfo').port  : '8080' }
+              defaultValue={ API.getApiInfo().port }
               helperText="blank for port 8080"
             />
-          </ExpansionPanelDetails>
-        </ExpansionPanel>
-        <ExpansionPanel
-          square
-          expanded={expanded === 'panel2'}
-          onChange={this.handleChange('panel2')}
+        </ExpansionPanelDetails>
+      </ExpansionPanel>
+      <ExpansionPanel>
+        <ExpansionPanelSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel2a-content"
+          id="panel2a-header"
         >
-          <ExpansionPanelSummary>
-            <Typography>Something Else</Typography>
-          </ExpansionPanelSummary>
-          <ExpansionPanelDetails>
-            <Typography>
-              
-            </Typography>
-          </ExpansionPanelDetails>
-        </ExpansionPanel>
-        <div className={classes.buttons}>
-          <Button className={classes.button} variant="contained" color="primary" onClick={() => this.handleClose()}>Save</Button>
-          <Button className={classes.button} variant="contained"  onClick={() => this.handleClose()}>Cancel</Button>
-        </div>
-        
+          <Typography className={classes.heading}>More Settings</Typography>
+        </ExpansionPanelSummary>
+        <ExpansionPanelDetails>
+        <Typography>
+            Set some more settings here 
+          </Typography>
+        </ExpansionPanelDetails>
+      </ExpansionPanel>
+      <div className={classes.buttons}>
+        <Button className={classes.button} variant="contained" color="primary" onClick={() => handleClose()}>Save</Button>
+        <Button className={classes.button} variant="contained"  onClick={() => handleCloseCancel()}>Cancel</Button>
       </div>
-    );
+    </div>
+  );
 
-    return (
-      <div>
-        <SwipeableDrawer
-          
-          anchor="top"
-          open={this.state.open}
-          onClose={() => this.handleClose()}
-          onOpen={() => this.handleOpen()}
-        >
-          <div
-            tabIndex={0}
-            role="button"
-          >
-            {fullList}
-          </div>
-        </SwipeableDrawer>
-      </div>
-    );
-  }
+  return (
+    <div>
+        <Drawer anchor="top" open={open} onClose={() => handleClose()}>
+          {fullList('top')}
+        </Drawer>
+    </div>
+  );
+
 }
 
-Settings.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
-
-export default withStyles(styles)(Settings);
+export default Settings;

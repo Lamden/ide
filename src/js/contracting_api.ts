@@ -3,11 +3,35 @@ function apiURL (apiInfo, ENDPOINT){
     if (apiInfo) { return apiInfo.hostname + ':' + apiInfo.port + ENDPOINT;}     
 }
 
-export function apicheck(apiInfo){
+export function getApiInfo() {
+    let apiInfo = {status: 'Offline', hostname: 'http:\\\\localhost', port: '8080'}
+    try {
+        apiInfo = JSON.parse(localStorage.getItem('apiInfo'));
+    } catch {
+        setApiInfo(apiInfo)
+    }
+    return apiInfo
+}
+
+export function getApiInfoHostname() {
+    const apiInfo = JSON.parse(localStorage.getItem('apiInfo'));
+    return apiInfo.hostname
+}
+
+export function getApiInfoPort() {
+    const apiInfo = JSON.parse(localStorage.getItem('apiInfo'));
+    return apiInfo.port
+}
+
+export function setApiInfo(apiInfo) {
+    localStorage.setItem('apiInfo', JSON.stringify(apiInfo));
+}
+
+export function apicheck(){
     const ENDPOINT = '/';
     
     return new Promise (function(resolve, reject){
-        fetch(apiURL(apiInfo, ENDPOINT))
+        fetch(apiURL(getApiInfo(), ENDPOINT))
         .then(response => resolve (response.text()))
         .catch((error) => {
             reject(error);

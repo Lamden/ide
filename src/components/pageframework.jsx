@@ -1,41 +1,31 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import classNames from 'classnames';
-import { withStyles } from '@material-ui/core/styles';
-import Drawer from '@material-ui/core/Drawer';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Button from '@material-ui/core/Button';
-import List from '@material-ui/core/List';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import Typography from '@material-ui/core/Typography';
-import Divider from '@material-ui/core/Divider';
-import IconButton from '@material-ui/core/IconButton';
+import React, { useState, useEffect } from 'react';
+
+import clsx from 'clsx';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
+
+import {Drawer, AppBar, Toolbar, Button, List, CssBaseline, 
+        Typography, Divider, IconButton, ListItem, ListItemIcon, ListItemText
+        } from '@material-ui/core';
+
+import {FiberManualRecord, Publish, CheckCircleOutline
+        } from '@material-ui/icons';
+
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import FiberManualRecord from '@material-ui/icons/FiberManualRecord';
-import Publish from '@material-ui/icons/Publish';
-import CheckCircleOutline from '@material-ui/icons/CheckCircleOutline';
+
 import { fade } from '@material-ui/core/styles/colorManipulator';
 import { withSnackbar } from 'notistack';
 
 
 import Settings from "../components/settings";
 import MonacoEditor from "../components/monacoeditor";
-import ContractSearch from "../components/fragments/contractsearch";
 import * as API from '../js/contracting_api.ts';
 import Cookies from 'universal-cookie';
 
-const cookies = new Cookies();
-
-
 const drawerWidth = 240;
 
-const styles = theme => ({
+const useStyles = makeStyles(theme => ({
   root: {
     display: 'flex',
   },
@@ -123,113 +113,73 @@ const styles = theme => ({
   statusPending: {
     fill: 'orange',
   }
-});
+}));
 
-class PageFramework extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      open: false,
-      editorWidth: '90vw',
-      editorValue:  [ '# This is where the revolution begins... \n', ' \n', ' \n', ' \n'].join('\n'),
-      newContract: undefined,
-      windowHeight: undefined,
-      windowWidth: undefined,
-      ApiInfo: {status: 'Offline'},
-      contractList: []
-    };
+function PageFramework(props) {
+  const classes = useStyles();
+  const theme = useTheme();
+  const [open, setOpen] = useState(false);
+  const [openSettings, setOpenSettings] = useState(false);
+  const [initialized, setInitialized] = useState(false);
+  const [apiStatus, setApiStatus] = useState(undefined);
+  const [newContract, setNewContract] = useState('');
+  const [windowState, setWindowState] = useState({ height: 0, width:0 });
 
-    /*
-     Bind our childHandler function to this context
-     that will get called from our Child component
-    */
-   
-}
-
-  componentDidMount() {
-    this.handleResize();
-    window.addEventListener('resize', this.handleResize);
-
-    let apiInfo = !cookies.get('apiInfo') ? {hostname: 'http:\\\\localhost', port: '8080'} : cookies.get('apiInfo');
-    apiInfo.status = 'Offline';
-
-    this.setState({ApiInfo: apiInfo}, () => {
-      cookies.set('apiInfo', apiInfo)
-      this.connectToAPI();
-    });
+  //Set Refs
+  const [monacoEditor, setMonacoEditor] = useState(undefined);
+  function setMonacoRef (ref){
+    setMonacoEditor(ref)
   }
 
-  componentWillUnmount() {
-    window.removeEventListener('resize', this.handleResize)
-  }
+  useEffect(() => {
+    if (!initialized) {
+      handleResize();
+      window.addEventListener('resize', handleResize());
 
-  changeApiServer = (newHost, port) => {
-    cookies.set('apiInfo', {hostname: newHost, port: port})
-    let apiInfo = this.state.ApiInfo;
-    apiInfo.hostname = newHost;
-    apiInfo.port = port;
-    this.setState({ApiInfo: apiInfo}, () => {
-      this.connectToAPI();
-    });
-  }
-
-  connectToAPI = () => {
-    this.props.enqueueSnackbar('Connecting to ' + this.state.ApiInfo.hostname + ':' + this.state.ApiInfo.port , { variant: 'info' });
-    let apiInfo = this.state.ApiInfo;
-    apiInfo.status = 'Connecting...';
-    this.setState({ ApiInfo: apiInfo }, () => {
-        API.apicheck(this.state.ApiInfo)
-          .then(data => this.setApiStatus(data))
-          .catch(e => this.handleApiError(e))
-    });
-  }
-
-  setApiStatus = (status) => {
-    let apiInfo = this.state.ApiInfo;
-    if (status === 'indeed'){
-      apiInfo.status = 'Online';
-      this.props.enqueueSnackbar('Connected to API server!', { variant: 'success' });
-      this.setState({ApiInfo: apiInfo}, () => {
-        API.contracts(this.state.ApiInfo)
-          .then(data => data.contracts.map(contract => ({label: contract, value: contract})))
-          .then(contractList => this.setState({contractList}))
-        });
-    }else{
-      this.handleApiError();
+      connectToAPI();
+      setInitialized(true);
     }
+
+    return () => {(window.removeEventListener('resize', handleResize()))}
+  });
+
+  useEffect(() => {
+    if (apiStatus === undefined) {return}
+    props.enqueueSnackbar('API Server ' + apiStatus, { variant: apiStatus !== 'Online' ? apiStatus === 'Connecting...' ? 'info' : 'default'  : 'success' });
+
+  }, [apiStatus]);
+
+  function handleDrawerOpen() {
+    setOpen(true);
   }
 
-  handleApiError = (error) => {
-    let apiInfo = this.state.ApiInfo;
-    apiInfo.status = 'Offline';
+  function handleDrawerClose() {
+    setOpen(false);
+  }
 
-    this.setState({ApiInfo: apiInfo}, () => {
+  function connectToAPI(){
+    setApiStatus('Connecting...');
+    API.apicheck()
+      .then(data => data === 'indeed' ? setApiStatus('Online') : setApiStatus('Offline'))
+      .catch(e => handleApiError(e));
+  }
+
+  function handleApiError(error) {
+    setApiStatus('Offline')
+    const apiInfo = API.getApiInfo();
+    
       if (!error){
-        this.props.enqueueSnackbar('Unknown API Server Error', { variant: 'error' });
+        props.enqueueSnackbar('Unknown API Server Error', { variant: 'error' });
         return
       } 
       if (error.message === 'Failed to fetch'){
-        this.props.enqueueSnackbar('Unable to connect to API endpoint ' + this.state.ApiInfo.hostname + ':' + this.state.ApiInfo.port + '. Check API settings.', { variant: 'error' });
+        props.enqueueSnackbar('Unable to connect to API endpoint ' + apiInfo.hostname + ':' + apiInfo.port + '. Check API settings.', { variant: 'error' });
         return;
       }
-      this.props.enqueueSnackbar(error, { variant: 'error' });
-    });
-
+      props.enqueueSnackbar(error, { variant: 'error' });
   }
-
-  handleDrawerOpen = () => {
-    this.setState({ open: true, editorWidth: '80vw' });
-  };
-
-  handleDrawerClose = () => {
-    this.setState({ open: false, editorWidth: '90vw' });
-  };
-
-  handleSubmitClick = () =>{
-    this.setState({ open: true, editorValue: 'Now this' });
-  }
-
-  handleSearchChoice = (contract) => {
+/*
+  function handleSearchChoice(contract) {
     let openFiles = cookies.get('openfiles');
     if(!openFiles){
         cookies.set('openfiles', [contract])
@@ -241,116 +191,102 @@ class PageFramework extends React.Component {
     }
     this.setState({ newContract: [contract] })
   }
+*/
+  function handleResize() {
+    setWindowState({height: window.innerHeight, width: window.innerWidth})
+  };
 
-  handleResize = () => this.setState({
-    windowHeight: window.innerHeight,
-    windowWidth: window.innerWidth
-  });
-
-  handleOpenSettings = () => {
-    this.settingsDrawer.toggleDrawer();
+  function toggleSettings() {
+    setOpenSettings(!openSettings);
   }
 
-  render() {
-    const { classes, theme } = this.props;
 
-    return (
-      <div className={classes.root}>
-        <CssBaseline />
-        <Settings retryAPI={this.changeApiServer} onRef={ref => this.settingsDrawer = ref}/>
-        <AppBar
-          position="fixed"
+
+  return (
+    <div className={classes.root}>
+      <CssBaseline />
+     <Settings connectToAPI={() => connectToAPI()} openSettings={openSettings} toggleSettings={() => toggleSettings()}/>
+      <AppBar
+        position="fixed"
+        className={clsx(classes.appBar, {
+          [classes.appBarShift]: open,
+        })}
+      >
+        <Toolbar style={{'backgroundColor': '#512354'}}>
+          <IconButton
+            color="inherit"
+            aria-label="Open drawer"
+            onClick={() => handleDrawerOpen()}
+            edge="start"
+            className={clsx(classes.menuButton, {
+              [classes.hide]: open,
+            })}
+          >
+            <MenuIcon />
+          </IconButton>
           
-          className={classNames(classes.appBar, {
-            [classes.appBarShift]: this.state.open
-          })}
-        >
-          <Toolbar disableGutters={!this.state.open} style={{'backgroundColor': '#512354'}}>
-            <IconButton
-              color="inherit"
-              aria-label="Open drawer"
-              onClick={this.handleDrawerOpen}
-              className={classNames(classes.menuButton, {
-                [classes.hide]: this.state.open,
-              })}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography variant="h6" color="inherit" noWrap>
-              Lamden
-            </Typography>
-            <div className={classes.search}>
-              <ContractSearch ApiInfo={this.state.ApiInfo} selectedContract={this.handleSearchChoice} contracts={this.state.contractList}/>
-            </div>
-            <div className={classes.grow} />
-            <Button color="inherit" onClick={() => this.handleOpenSettings()}>Settings</Button>
-          </Toolbar>
-        </AppBar>
-        <Drawer
-          variant="permanent"
-          className={classNames(classes.drawer, {
-            [classes.drawerOpen]: this.state.open,
-            [classes.drawerClose]: !this.state.open,
-          })}
-          classes={{
-            paper: classNames({
-              [classes.drawerOpen]: this.state.open,
-              [classes.drawerClose]: !this.state.open,
-            }),
-          }}
-          open={this.state.open}
-        >
-          <div className={classes.toolbar}>
-            <IconButton onClick={this.handleDrawerClose}>
-              {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-            </IconButton>
-          </div>
-          <Divider />
-          <List>
-            <ListItem key='apistatus' title={'API Connection ' + this.state.ApiInfo.status} onClick={() => this.connectToAPI()}>
+          <Typography variant="h6" noWrap>
+            Lamden Contracting
+          </Typography>
+          <div className={classes.grow} />
+          <Button color="inherit" onClick={() => toggleSettings()}>Settings</Button>
+        </Toolbar>
+      </AppBar>
+      <Drawer
+        variant="permanent"
+        className={clsx(classes.drawer, {
+          [classes.drawerOpen]: open,
+          [classes.drawerClose]: !open,
+        })}
+        classes={{
+          paper: clsx({
+            [classes.drawerOpen]: open,
+            [classes.drawerClose]: !open,
+          }),
+        }}
+        open={open}
+      >
+        <div className={classes.toolbar}>
+          <IconButton onClick={() => handleDrawerClose()}>
+            {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+          </IconButton>
+        </div>
+        <Divider />
+        <List>
+            <ListItem key='apistatus' title={'API Connection ' + apiStatus} onClick={() => connectToAPI()}>
               <ListItemIcon> 
-                <FiberManualRecord className={classNames({
-                                                          [classes.statusOnline]: this.state.ApiInfo.status === 'Online',
-                                                          [classes.statusPending]: this.state.ApiInfo.status === 'Connecting...',
-                                                          [classes.statusOffline]: this.state.ApiInfo.status === 'Offline'}
+                <FiberManualRecord className={clsx({
+                                                          [classes.statusOnline]: apiStatus === 'Online',
+                                                          [classes.statusPending]: apiStatus === 'Connecting...',
+                                                          [classes.statusOffline]: apiStatus === 'Offline'}
                                                         )}
                 />
 
               </ListItemIcon>
-              <ListItemText primary={'API ' + this.state.ApiInfo.status} />
+              <ListItemText primary={'API ' + apiStatus} />
             </ListItem>
-            <ListItem button key='Lint' onClick={() => this.ClickController('Lint')}>
+            <ListItem button key='Lint' onClick={() => monacoEditor.clickController('Lint')}>
               <ListItemIcon><CheckCircleOutline /></ListItemIcon>
               <ListItemText primary='Error Check' />
             </ListItem>
-            <ListItem button key='Submit' onClick={() => this.ClickController('Submit')}>
+            <ListItem button key='Submit' onClick={() => monacoEditor.clickController('Submit')}>
               <ListItemIcon><Publish /></ListItemIcon>
               <ListItemText primary='Submit' />
             </ListItem>
           </List>
-        </Drawer>
-        
-        <main className={classes.content}>
-            <MonacoEditor 
-              onRef={ref => this.monacoEditor = ref}
-              setClick={click => this.ClickController = click}
-              ApiInfo={this.state.ApiInfo}
-              value={this.state.editorValue}
-              newContract={this.state.newContract}
-              width={this.state.open ? ((this.state.windowWidth - drawerWidth) * 0.75) : this.state.windowWidth * 0.75}
-              height={this.state.windowHeight}
-              drawerOpen = {this.state.open}
-              action={this.editorHandler}
-            />
-        </main>
-      </div>
-    );
-  }
+      </Drawer>
+      <main className={classes.content}>
+        <MonacoEditor 
+          monacoRef={ref => setMonacoRef(ref)}
+          //setClick={click => ClickController = click} 
+          newContract={newContract}
+          width={open ? ((windowState.width - drawerWidth) * 0.75) : windowState.width * 0.75}
+          height={windowState.height}
+          drawerOpen = {open}
+        />
+      </main>
+    </div>
+  )
 }
 
-PageFramework.propTypes = {
-  classes: PropTypes.object.isRequired,
-  theme: PropTypes.object.isRequired,
-};
-
-export default withStyles(styles, { withTheme: true })(withSnackbar(PageFramework));
+export default withSnackbar(PageFramework);

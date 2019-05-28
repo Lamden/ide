@@ -8,6 +8,7 @@ import Paper from '@material-ui/core/Paper';
 
 import * as API from '../js/contracting_api.ts';
 import ErrorBox from "../components/errorbox";
+import ContractSearch from "../components/fragments/contractsearch";
 import MetaContract from "../components/metacontract";
 import Cookies from 'universal-cookie';
 
@@ -82,7 +83,6 @@ const styles = theme => ({
 class MonacoWindow extends Component {
   constructor(props) { 
       super(props);
-      this.clickController = this.clickController.bind(this);
       this.state = {
         errors: '',
         models: new Map(),
@@ -96,7 +96,7 @@ class MonacoWindow extends Component {
   }
 
   componentDidMount() {
-    this.props.onRef(this);
+    this.props.monacoRef(this);
     import("monaco-editor")
       .then( monaco => {
         this.monaco = monaco;
@@ -108,13 +108,13 @@ class MonacoWindow extends Component {
           cookies.set('openfiles', [])
         }
 
-        this.newTab();
+        //this.newTab();
 
-        this.props.setClick(this.clickController);
       })
   }
 
   componentDidUpdate(prevProps, prevState, snapshot){
+    /*
     if (this.props.ApiInfo.status === 'Offline' || this.props.ApiInfo.status === 'Pending'){
       this.prevStatus = 'Offline';
     }
@@ -122,7 +122,7 @@ class MonacoWindow extends Component {
     if (this.prevStatus === 'Offline' && this.props.ApiInfo.status === 'Online'){
       this.prevStatus = 'Online';
 
-    }
+    }*/
 
     if (this.props.newContract && this.props.newContract !== prevProps.newContract){
       API.contract(this.props.ApiInfo, this.props.newContract[0])
@@ -135,7 +135,7 @@ class MonacoWindow extends Component {
     switch(action) {
       case "Lint":
         this.props.enqueueSnackbar('Checking contract for errors...', { variant: 'info' });
-        API.lint(this.props.ApiInfo, 'testName', this.getEditorValue()).then(data => this.handleErrors(data));
+       // API.lint(this.props.ApiInfo, 'testName', this.getEditorValue()).then(data => this.handleErrors(data));
         break;
       case "Submit":
         this.props.enqueueSnackbar('Attempting to submit contract...', { variant: 'info' });
@@ -302,6 +302,7 @@ class MonacoWindow extends Component {
                 <EditorContainer width={this.props.drawerOpen ? this.props.width : this.props.width - 73} height={this.props.height * 0.65} className="monaco-window" />
               </span>
               <span className={classNames(classes.metaBox)}>
+                <ContractSearch ApiInfo={this.state.ApiInfo} selectedContract={this.handleSearchChoice} contracts={this.state.contractList}/>
                 <MetaContract 
                   methods={this.state.methods}
                   variables={this.state.variables}
