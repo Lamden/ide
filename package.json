@@ -27,6 +27,7 @@
     "react-helmet": "^5.2.1",
     "react-monaco-editor": "^0.25.1",
     "react-select": "^2.4.3",
+    "react-splitter-layout": "^4.0.0",
     "universal-cookie": "^4.0.0"
   },
   "devDependencies": {

@@ -18,10 +18,13 @@ import { fade } from '@material-ui/core/styles/colorManipulator';
 import { withSnackbar } from 'notistack';
 
 
+//Import Components
 import Settings from "../components/settings";
 import MonacoEditor from "../components/monacoeditor";
-import * as API from '../js/contracting_api.ts';
-import Cookies from 'universal-cookie';
+
+//Import Utils
+import * as API from '../js/contracting_api';
+import * as LShelpers from '../js/localstorage_helpers';
 
 const drawerWidth = 240;
 
@@ -132,21 +135,24 @@ function PageFramework(props) {
   }
 
   useEffect(() => {
-    if (!initialized) {
-      handleResize();
-      window.addEventListener('resize', handleResize());
+    const setFromEvent = e => setWindowState({ height: e.target.innerHeight, width: e.target.innerWidth });
+    window.addEventListener('resize', setFromEvent);
+    return () => {
+      window.addEventListener('resize', setFromEvent);
+    };
+  }, []);
 
+  useEffect(() => {
+    if (!initialized) {
+      setWindowState({height: window.innerHeight, width: window.innerWidth})
       connectToAPI();
       setInitialized(true);
     }
-
-    return () => {(window.removeEventListener('resize', handleResize()))}
-  });
+  }, [initialized]);
 
   useEffect(() => {
     if (apiStatus === undefined) {return}
     props.enqueueSnackbar('API Server ' + apiStatus, { variant: apiStatus !== 'Online' ? apiStatus === 'Connecting...' ? 'info' : 'default'  : 'success' });
-
   }, [apiStatus]);
 
   function handleDrawerOpen() {
@@ -155,6 +161,10 @@ function PageFramework(props) {
 
   function handleDrawerClose() {
     setOpen(false);
+  }
+
+  function toggleSettings() {
+    setOpenSettings(!openSettings);
   }
 
   function connectToAPI(){
@@ -166,7 +176,7 @@ function PageFramework(props) {
 
   function handleApiError(error) {
     setApiStatus('Offline')
-    const apiInfo = API.getApiInfo();
+    const apiInfo = LShelpers.getApiInfo();
     
       if (!error){
         props.enqueueSnackbar('Unknown API Server Error', { variant: 'error' });
@@ -192,15 +202,6 @@ function PageFramework(props) {
     this.setState({ newContract: [contract] })
   }
 */
-  function handleResize() {
-    setWindowState({height: window.innerHeight, width: window.innerWidth})
-  };
-
-  function toggleSettings() {
-    setOpenSettings(!openSettings);
-  }
-
-
 
   return (
     <div className={classes.root}>
@@ -259,9 +260,7 @@ function PageFramework(props) {
                                                           [classes.statusOnline]: apiStatus === 'Online',
                                                           [classes.statusPending]: apiStatus === 'Connecting...',
                                                           [classes.statusOffline]: apiStatus === 'Offline'}
-                                                        )}
-                />
-
+                                                        )}/>
               </ListItemIcon>
               <ListItemText primary={'API ' + apiStatus} />
             </ListItem>
@@ -278,9 +277,9 @@ function PageFramework(props) {
       <main className={classes.content}>
         <MonacoEditor 
           monacoRef={ref => setMonacoRef(ref)}
-          //setClick={click => ClickController = click} 
+          apiStatus={apiStatus}
           newContract={newContract}
-          width={open ? ((windowState.width - drawerWidth) * 0.75) : windowState.width * 0.75}
+          width={open ? ((windowState.width - drawerWidth)) : windowState.width}
           height={windowState.height}
           drawerOpen = {open}
         />

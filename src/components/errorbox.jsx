@@ -9,7 +9,7 @@ const styles = ({
     root: {
         color: 'red',
         backgroundColor: '#E4ECF0',
-        width: '100%',
+    //    width: '100%',
         height: '100%'
     },
     heading: {
@@ -68,7 +68,7 @@ class ErrorBox extends Component {
         return (
             <div style={{
                     
-                    height: this.props.height
+                   // height: this.props.height
                 }}
                 className={classNames(classes.root)}>
 

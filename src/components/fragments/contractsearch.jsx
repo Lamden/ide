@@ -1,26 +1,27 @@
 /* eslint-disable react/prop-types, react/jsx-handler-names */
 
 import React from 'react';
+import Select from 'react-select';
+
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import Select from 'react-select';
+
 import { withStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import NoSsr from '@material-ui/core/NoSsr';
-import TextField from '@material-ui/core/TextField';
-import Paper from '@material-ui/core/Paper';
-import Chip from '@material-ui/core/Chip';
-import MenuItem from '@material-ui/core/MenuItem';
+import { Typography, NoSsr, TextField, Paper, Button, Chip, MenuItem } from '@material-ui/core';
+
 import CancelIcon from '@material-ui/icons/Cancel';
 import { emphasize } from '@material-ui/core/styles/colorManipulator';
+
+import * as API from '../../js/contracting_api';
 
 const styles = theme => ({
   root: {
     flexGrow: 1,
+    marginLeft: '10px'
   },
   input: {
     display: 'flex',
-    padding: 0,
+    padding: 15,
   },
   valueContainer: {
     display: 'flex',
@@ -28,7 +29,6 @@ const styles = theme => ({
     flex: 1,
     alignItems: 'center',
     overflow: 'hidden',
-    paddingLeft: '10px'
   },
   chip: {
     margin: `${theme.spacing.unit / 2}px ${theme.spacing.unit / 4}px`,
@@ -43,13 +43,12 @@ const styles = theme => ({
     padding: `${theme.spacing.unit}px ${theme.spacing.unit * 2}px`,
   },
   singleValue: {
-    fontSize: 16,
-    color: '#d6d6d6'
+    fontSize: 20,
   },
   placeholder: {
     position: 'absolute',
     left: 2,
-    fontSize: 16,
+    fontSize: 20,
     paddingLeft: '5px',
     color: '#aaaaaa'
   },
@@ -59,6 +58,9 @@ const styles = theme => ({
     marginTop: theme.spacing.unit,
     left: 0,
     right: 0,
+  },
+  button: {
+    margin: '10px'
   }
 });
 
@@ -173,28 +175,40 @@ class ContractSearch extends React.Component {
     state = {
         single: null,
         multi: null,
-        contracts: []
+        contracts: [],
+        apiStatus: 'Offline'
     };
+
 
     componentDidUpdate(){
-      if (this.state.contracts !== this.props.contracts){
-        this.updateContractList(this.props.contracts);
+      if (this.props.apiStatus !== this.state.apiStatus){
+          if (this.props.apiStatus === 'Online'){
+            API.contracts()
+              .then(data => data.contracts.map(contract => ({label: contract, value: contract})))
+              .then(contracts => this.setState({contracts, apiStatus: 'Online'}));
+          }
+          if (this.props.apiStatus === 'Offline'){
+            this.setState({contracts: [], apiStatus: 'Offline'})
+          }
+        }
       }
-    }
 
-    handleChange = name => value => {
+    handleChange = () => value => {
         this.setState({
-            [name]: value,
+            single: value,
         }, () => {
             if (this.state.single){
-                this.props.selectedContract(this.state.single.value)
+                this.props.getMeta(this.state.single.value);
+            }else{
+              this.props.getMeta();
             }
-        });
-        
+        }); 
     };
 
-    updateContractList = (contracts) => {
-      this.setState({ contracts })
+    openCode = () => {
+      API.contract(this.state.single.value)
+        .then(data => this.props.openCode(data))
+        .catch(e => this.setState({errors: e}));
     }
 
   render() {
@@ -215,16 +229,23 @@ class ContractSearch extends React.Component {
       <div className={classes.root}>
         <NoSsr>
           <Select
-            onSubmit={this.handleChange('single')}
+            onSubmit={this.handleChange()}
             classes={classes}
             styles={selectStyles}
             options={this.state.contracts}
             components={components}
             value={this.state.single}
-            onChange={this.handleChange('single')}
-            placeholder="Search Contracts"
+            onChange={this.handleChange()}
+            placeholder = {this.state.apiStatus === 'Online' ? "Contracts DB" : 'API Offline'}
             isClearable
           />
+          {this.state.single ?
+            <div>
+              <Button className={classes.button} size="medium" onClick={() => this.openCode()}>Open Code</Button>
+            </div>
+          : null
+          }
+
         </NoSsr>
       </div>
     );

@@ -12,7 +12,7 @@ import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
-import * as API from '../js/contracting_api.ts';
+import * as LShelpers from '../js/localstorage_helpers';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -46,7 +46,7 @@ function Settings(props) {
 
   useEffect(() => {
     if (!initialized) {
-      setSavedApiInfo(API.getApiInfo())
+      setSavedApiInfo(LShelpers.getApiInfo())
       setInitialized(true);
     }
   });
@@ -57,31 +57,31 @@ function Settings(props) {
 
 
   const handleHostnameChange = () => event => {
-      let apiInfo = API.getApiInfo();
+      let apiInfo = LShelpers.getApiInfo();
       apiInfo.hostname = event.target.value;
-      API.setApiInfo(apiInfo);
+      LShelpers.setApiInfo(apiInfo);
   };
 
   const handlePortChange = () => event => {
-    let apiInfo = API.getApiInfo();
+    let apiInfo = LShelpers.getApiInfo();
     apiInfo.port = event.target.value;
-    API.setApiInfo(apiInfo);
+    LShelpers.setApiInfo(apiInfo);
   };
 
 
   function handleClose() {
-    let apiInfo = API.getApiInfo(); 
+    let apiInfo = LShelpers.getApiInfo(); 
     apiInfo.hostname = apiInfo.hostname === '' ? 'http:\\\\localhost' : apiInfo.hostname;
     apiInfo.hostname = apiInfo.hostname.indexOf('http:\\') === 0 || apiInfo.hostname.indexOf('https:\\')  === 0 ? apiInfo.hostname : 'http:\\\\' + apiInfo.hostname;
     apiInfo.port = apiInfo.port === '' ? '8080' : apiInfo.port;
-    API.setApiInfo(apiInfo);
-    if(apiInfo === savedApiInfo){ props.connectToAPI(); }
+    LShelpers.setApiInfo(apiInfo);
+    if(JSON.stringify(apiInfo) !== JSON.stringify(savedApiInfo) ){ props.connectToAPI(); }
     setSavedApiInfo(apiInfo);
     toggleDrawer();
   }
 
   function handleCloseCancel() {
-    API.setApiInfo(savedApiInfo);
+    LShelpers.setApiInfo(savedApiInfo);
     toggleDrawer();
   }
 
@@ -106,7 +106,7 @@ function Settings(props) {
               className={classNames(classes.margin, classes.textField)}
               onChange={handleHostnameChange()}
               margin="normal"
-              defaultValue={ API.getApiInfo().hostname }
+              defaultValue={ LShelpers.getApiInfo().hostname }
               helperText="blank for http:\\localhost"
             />
             <TextField
@@ -115,7 +115,7 @@ function Settings(props) {
               className={classNames(classes.margin, classes.textField)}
               onChange={handlePortChange()}
               margin="normal"
-              defaultValue={ API.getApiInfo().port }
+              defaultValue={ LShelpers.getApiInfo().port }
               helperText="blank for port 8080"
             />
         </ExpansionPanelDetails>

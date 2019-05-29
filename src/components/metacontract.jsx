@@ -7,7 +7,11 @@ import Typography from '@material-ui/core/Typography';
 import { Input } from '@material-ui/icons';
 import { TextField, Paper } from '@material-ui/core';
 
+//Import Components
+import ContractSearch from "../components/fragments/contractsearch";
 
+//Import Utils
+import * as API from '../js/contracting_api';
 
 
 const styles = theme => ({
@@ -21,7 +25,7 @@ const styles = theme => ({
     textField: {
         marginLeft: '5px',
         marginRight: '5px',
-        width: '45%',
+        width: '98%',
       },
       methodBox: {
         padding:' 5px',
@@ -30,6 +34,9 @@ const styles = theme => ({
       },
       headings:{
         marginTop: '0',
+      },
+      headingsDisabled: {
+        color: 'grey',
       },
       methodRow: {
         color: '#512354',
@@ -41,20 +48,45 @@ const styles = theme => ({
       methodName: {
         fontSize: '1em',
         marginLeft: '5px',
+        marginTop: '2px',
         fontWeight: 'bold',
       },
       runIcon: {
           
       },
       paperBox: {
-          margin: '0 5px 10px',
-          padding: '0 5px',
-          borderTop: '2px solid #45387F',
-
+          margin: '10px 0px 10px 10px',
+          padding: '5px',
+         // borderTop: '2px solid #45387F',
       }
 });
 
 class MetaContract extends Component {
+    constructor(props) { 
+        super(props);
+        this.state = {
+          apiStatus: 'Offline',
+          methods: undefined,
+          variables: undefined
+        }
+    }
+
+    componentDidUpdate(){
+        if (this.props.apiStatus !== this.state.apiStatus){
+          this.setState({ apiStatus: this.props.apiStatus })
+        }
+    }
+
+    getMeta = (name) => {
+        if (name){
+            API.methods(name)
+            .then(data => !data.error ? this.setState({methods: data.methods}) : null);
+            API.variables(name)
+            .then(data => !data.error ? this.setState({variables: data.variables}) : null);
+        }else{
+            this.setState({methods: undefined, variables: undefined})
+        }
+      }
 
     render() {
         const { classes } = this.props
@@ -64,10 +96,17 @@ class MetaContract extends Component {
                 style={{
                     height: this.props.height
                 }}>
+                    
+                <ContractSearch 
+                    apiStatus={this.state.apiStatus} 
+                    getMeta={(name) => this.getMeta(name)} 
+                    openCode={(data) => this.props.openCode(data.name, data.code)}
+                />
+
                 <Paper className={classNames(classes.paperBox)}>
-                <h2 className={classNames(classes.headings)}>Methods</h2>
-                {this.props.methods ?
-                    this.props.methods.map(function(method, methodIndex){
+                <h3 className={classNames(classes.headings, {[classes.headingsDisabled]: this.state.apiStatus === 'Offline'})}>Methods</h3>
+                {this.state.methods ?
+                    this.state.methods.map(function(method, methodIndex){
                         if (method.name !== "____"){
                             return <div key={methodIndex} className={classNames(classes.methodBox)}>
                                     <div className={classNames(classes.methodRow)}>
@@ -83,25 +122,22 @@ class MetaContract extends Component {
                                                             className={classes.textField}
                                                             margin="normal"
                                                         />
-                                            
                                         })}
                                 </div>
                         }else{return null}
-                        
-                        
                     })
-                : 'None' }
+                : null }
                 </Paper>
+                
                 <Paper className={classNames(classes.paperBox)}>
-                <h2>Variables</h2>
-                {this.props.variables ?
-                    this.props.variables.map(function(variable, variableIndex){
+                <h3 className={classNames(classes.headings, {[classes.headingsDisabled]: this.state.apiStatus === 'Offline'})}>Variables</h3>
+                {this.state.variables ?
+                    this.state.variables.map(function(variable, variableIndex){
                         return null
                         
                     })
-                : 'None' }
+                : null }
                 </Paper>
-
             </div>
         );
     }

@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
@@ -6,12 +7,14 @@ import { withSnackbar } from 'notistack';
 import { Close, Add } from '@material-ui/icons';
 import Paper from '@material-ui/core/Paper';
 
-import * as API from '../js/contracting_api.ts';
+//Import Components
 import ErrorBox from "../components/errorbox";
-import ContractSearch from "../components/fragments/contractsearch";
 import MetaContract from "../components/metacontract";
-import Cookies from 'universal-cookie';
 
+//Import Utils
+import * as API from '../js/contracting_api';
+
+import Cookies from 'universal-cookie';
 const cookies = new Cookies();
 
 const tabsHeight = 37;
@@ -21,7 +24,8 @@ const EditorContainer = (props) => {
           style={{
             width: props.width ? props.width : '500px', 
             height: props.height ? props.height: '500px',
-            borderTop: '2px solid #45387F', paddingTop: '10px', margin: '0px 4px 15px'}}
+            borderTop: '2px solid #45387F', paddingTop: '10px', margin: '0px 4px 15px'
+          }}
           id="editor-container"></Paper>
 };
 
@@ -87,7 +91,9 @@ class MonacoWindow extends Component {
         errors: '',
         models: new Map(),
         currentTab: {},
+        apiStatus: 'Offline'
       }
+      
       this.editor = null; 
       this.monaco = null;
       this.startingWords = '# Welcome to the blockchain revolution';
@@ -102,6 +108,8 @@ class MonacoWindow extends Component {
         this.monaco = monaco;
         this.editor = this.monaco.editor.create(document.getElementById("editor-container"), {automaticLayout: true});
         
+        
+
         cookies.remove('openFiles');
 
         if (!cookies.get('openfiles')){
@@ -113,22 +121,10 @@ class MonacoWindow extends Component {
       })
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot){
-    /*
-    if (this.props.ApiInfo.status === 'Offline' || this.props.ApiInfo.status === 'Pending'){
-      this.prevStatus = 'Offline';
+  componentDidUpdate(){
+    if (this.props.apiStatus !== this.state.apiStatus){
+      this.setState({ apiStatus: this.props.apiStatus })
     }
-
-    if (this.prevStatus === 'Offline' && this.props.ApiInfo.status === 'Online'){
-      this.prevStatus = 'Online';
-
-    }*/
-
-    if (this.props.newContract && this.props.newContract !== prevProps.newContract){
-      API.contract(this.props.ApiInfo, this.props.newContract[0])
-      .then(data => this.createNewFile(data.name, data.code))
-      .catch(e => this.setState({errors: e}));
-      }
   }
 
   clickController = (action) =>{
@@ -164,12 +160,7 @@ class MonacoWindow extends Component {
       const newFile = this.monaco.editor.createModel(code, 'python');
       this.editor.setModel(newFile);
       models.set(name, newFile);
-      this.setState({ models, currentTab: {name, id: newFile.id}}, () => {
-        API.methods(this.props.ApiInfo, name)
-        .then(data => !data.error ? this.setState({methods: data.methods}) : null);
-        API.variables(this.props.ApiInfo, name)
-        .then(data => !data.error ? this.setState({variables: data.variables}) : null);
-      });
+      this.setState({ models, currentTab: {name, id: newFile.id}});
     }else{     
       this.handleFileSwitching(name);
     }
@@ -270,7 +261,9 @@ class MonacoWindow extends Component {
   }
 
   render() {
-    const { classes } = this.props
+    const { classes } = this.props;
+    const width = this.props.width * 0.7;
+    const height = this.props.height * 0.7;
 
     const tabs = []
 
@@ -299,14 +292,15 @@ class MonacoWindow extends Component {
           </div>
           <div className={classNames(classes.editorRow)}> 
               <span>
-                <EditorContainer width={this.props.drawerOpen ? this.props.width : this.props.width - 73} height={this.props.height * 0.65} className="monaco-window" />
+                <EditorContainer width={this.props.drawerOpen ? width : width - 73} height={height} className="monaco-window" />
               </span>
               <span className={classNames(classes.metaBox)}>
-                <ContractSearch ApiInfo={this.state.ApiInfo} selectedContract={this.handleSearchChoice} contracts={this.state.contractList}/>
                 <MetaContract 
+                  apiStatus={this.state.apiStatus}
                   methods={this.state.methods}
                   variables={this.state.variables}
-                  height={this.props.height * 0.65}
+                  openCode={(data, code) => this.createNewFile(data, code)}
+                  height={height ? height : '500px'}
                 />
               </span>
             </div>
