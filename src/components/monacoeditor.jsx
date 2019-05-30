@@ -13,6 +13,7 @@ import MetaContract from "../components/metacontract";
 
 //Import Utils
 import * as API from '../js/contracting_api';
+import * as LShelpers from '../js/localstorage_helpers';
 
 import Cookies from 'universal-cookie';
 const cookies = new Cookies();
@@ -89,7 +90,7 @@ class MonacoWindow extends Component {
       super(props);
       this.state = {
         errors: '',
-        models: new Map(),
+        models: { local: new Map(), database: new Map() },
         currentTab: {},
         apiStatus: 'Offline'
       }
@@ -106,18 +107,7 @@ class MonacoWindow extends Component {
     import("monaco-editor")
       .then( monaco => {
         this.monaco = monaco;
-        this.editor = this.monaco.editor.create(document.getElementById("editor-container"), {automaticLayout: true});
-        
-        
-
-        cookies.remove('openFiles');
-
-        if (!cookies.get('openfiles')){
-          cookies.set('openfiles', [])
-        }
-
-        //this.newTab();
-
+        this.editor = this.monaco.editor.create(document.getElementById("editor-container"), {automaticLayout: true});     
       })
   }
 
@@ -146,6 +136,23 @@ class MonacoWindow extends Component {
     }
   }
 
+  createNewModel = (code) => {
+    return this.monaco.editor.createModel(code, 'python');
+  }
+
+  createNewTab = (name, code, source) => {
+    let LsModels = LShelpers.getFiles();
+    let StateModels = this.state.models;
+
+    if (!LsModels[source].has(name)){
+      const model = this.createNewModel(code);
+      StateModels[source].set(name, model);
+      LShelpers.setFile(name, code, source);
+      this.setState({ models: StateModels, currentTab: {name, id: model.id}});
+    }
+      this.handleFileSwitching(name, source);
+  }
+
   getEditorValue = () =>{
     return this.editor.getValue();
   }
@@ -154,41 +161,35 @@ class MonacoWindow extends Component {
     this.createNewFile(value);
   }
 
-  createNewFile = (name, code) => {
-    let models = this.state.models;
-    if (!models.has(name)){
-      const newFile = this.monaco.editor.createModel(code, 'python');
-      this.editor.setModel(newFile);
-      models.set(name, newFile);
-      this.setState({ models, currentTab: {name, id: newFile.id}});
-    }else{     
-      this.handleFileSwitching(name);
-    }
-  }
-
-  handleFileSwitching = (name) => {
-    const model = this.state.models.get(name);
+  handleFileSwitching = (name, source) => {
+    const model = this.state.models[source].get(name);
     if (model){
       this.editor.setModel(model);
       this.setState({currentTab: {name, id: model['id']}})
     }
   }
 
-  getCurretMethods = () => {
-    
-  }
-
-  openCookieFiles = async (openfiles) => {
-    openfiles.forEach(filename => {
-      API.contract(this.props.ApiInfo, filename)
-      .then(data => this.createModel(data.toString()))
-      .then(model => this.setState({ models: this.state.models.set(filename, model) }));
+  openTab = (filename) => {
+    const models = LShelpers.getFiles();
+    models.forEach(model => {
+      switch(model.source) {
+        case "database":
+          API.contract(this.props.ApiInfo, filename)
+            .then(data => this.createModel(data.toString()))
+            .then(model => this.setState({ models: this.state.models.set(filename, model) }));
+          break;
+        case "localstorage":
+          if(null){return};
+          break;
+        default:
+          break;
+      }
     });
   }
 
   createModel = (value) => {
     const model = this.monaco.editor.createModel(value, 'python');
-    this.editor.setModel(model);
+    this.editor.getModel(model);
     return model
   }
 
@@ -267,14 +268,32 @@ class MonacoWindow extends Component {
 
     const tabs = []
 
-    for (const [index, value] of this.state.models.entries()) {
+    for (const [index, value] of this.state.models.local.entries()) {
       tabs.push(
                   <div className={classNames(classes.tabs, {
                         [classes.tabSelected]: this.isTabSeleted(value),
                         [classes.tabUnselected]: !this.isTabSeleted(value)})}
                         key={index}>
                     <button className={classNames(classes.tabButton)}
-                            onClick={() =>  this.handleFileSwitching(index)}> {index} </button>
+                            onClick={() =>  this.handleFileSwitching(index, 'local')}> 
+                      {index} 
+                    </button>
+                    <Close className={classNames(classes.tabClose)} 
+                           onClick={() =>  this.closeTab(index)}/>
+                  </div>  
+                  )
+    }
+
+    for (const [index, value] of this.state.models.database.entries()) {
+      tabs.push(
+                  <div className={classNames(classes.tabs, {
+                        [classes.tabSelected]: this.isTabSeleted(value),
+                        [classes.tabUnselected]: !this.isTabSeleted(value)})}
+                        key={index}>
+                    <button className={classNames(classes.tabButton)}
+                            onClick={() =>  this.handleFileSwitching(index, 'database')}> 
+                      { 'db: ' + index } 
+                    </button>
                     <Close className={classNames(classes.tabClose)} 
                            onClick={() =>  this.closeTab(index)}/>
                   </div>  
@@ -299,7 +318,7 @@ class MonacoWindow extends Component {
                   apiStatus={this.state.apiStatus}
                   methods={this.state.methods}
                   variables={this.state.variables}
-                  openCode={(data, code) => this.createNewFile(data, code)}
+                  openCode={(name, code, source) => this.createNewTab(name, code, source)}
                   height={height ? height : '500px'}
                 />
               </span>

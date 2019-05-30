@@ -100,7 +100,7 @@ class MetaContract extends Component {
                 <ContractSearch 
                     apiStatus={this.state.apiStatus} 
                     getMeta={(name) => this.getMeta(name)} 
-                    openCode={(data) => this.props.openCode(data.name, data.code)}
+                    openCode={(name, code, source) => this.props.openCode(name, code, source)}
                 />
 
                 <Paper className={classNames(classes.paperBox)}>

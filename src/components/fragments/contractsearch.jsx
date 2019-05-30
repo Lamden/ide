@@ -207,8 +207,8 @@ class ContractSearch extends React.Component {
 
     openCode = () => {
       API.contract(this.state.single.value)
-        .then(data => this.props.openCode(data))
-        .catch(e => this.setState({errors: e}));
+        .then(data => this.props.openCode(data.name, data.code, 'database'))
+        .catch(e => console.log(e));
     }
 
   render() {
