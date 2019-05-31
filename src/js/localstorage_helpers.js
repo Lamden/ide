@@ -1,3 +1,12 @@
+//globalstate
+export function firstRun() {
+    if (localStorage.getItem('apiInfo')){
+        localStorage.setItem('firstRun', false);
+        return true;
+    }
+    return false
+}
+
 // API Functions
 
 export function getApiInfo() {
@@ -46,7 +55,6 @@ function getFilesObj(){
 }
 
 export function getFiles() {
-    console.log('getting files')
     let files = getFilesObj();
     if (files){
         return files
@@ -55,23 +63,45 @@ export function getFiles() {
 }
 
 export function setFile(name, code, source) {
-    console.log('setting file: ' + name)
     let files = getFilesObj();
     if (files){
         files[source].set(name, code);
         storeFilesObj(files);
+        console.log('saved')
         return files
     }
 }
 
 export function removeFile(name, source) {
-    console.log('removeing file: ' + name)
     let files = getFilesObj();
     if (files){
         files[source].delete(name);
         storeFilesObj(files);
         return files
     }
+}
+
+export function nameExists(name){
+    let files = getFilesObj();
+    if (files['local'].has(name)){
+        return true
+    }
+    return false
+}
+
+export function renameTab(oldName, newName, tabValue){
+        let files = getFilesObj();
+        let local = files.local;
+        try{
+            local.set(newName, tabValue);
+            local.delete(oldName);
+            files.local = local
+            storeFilesObj(files)
+            return true
+        } catch (e) {
+            console.log(e)
+            return false
+        }
 }
 
 function strMapToJson(strMap) {
@@ -84,8 +114,6 @@ function jsonToStrMap(jsonStr) {
 function strMapToObj(strMap) {
     let obj = Object.create(null);
     for (let [k,v] of strMap) {
-        // We don’t escape the key '__proto__'
-        // which can cause problems on older engines
         obj[k] = v;
     }
     return obj;

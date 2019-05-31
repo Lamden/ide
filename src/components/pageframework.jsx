@@ -21,6 +21,7 @@ import { withSnackbar } from 'notistack';
 //Import Components
 import Settings from "../components/settings";
 import MonacoEditor from "../components/monacoeditor";
+import HelpDialog from "../components/fragments/helpdialog"
 
 //Import Utils
 import * as API from '../js/contracting_api';
@@ -123,9 +124,9 @@ function PageFramework(props) {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
   const [openSettings, setOpenSettings] = useState(false);
+  const [openHelp, setOpenHelp] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [apiStatus, setApiStatus] = useState(undefined);
-  const [newContract, setNewContract] = useState('');
   const [windowState, setWindowState] = useState({ height: 0, width:0 });
 
   //Set Refs
@@ -145,6 +146,10 @@ function PageFramework(props) {
   useEffect(() => {
     if (!initialized) {
       setWindowState({height: window.innerHeight, width: window.innerWidth})
+      if (LShelpers.firstRun()){
+        console.log('firstrun')
+        setOpenHelp(true)
+      }
       connectToAPI();
       setInitialized(true);
     }
@@ -165,6 +170,10 @@ function PageFramework(props) {
 
   function toggleSettings() {
     setOpenSettings(!openSettings);
+  }
+
+  function toggleHelp() {
+    setOpenHelp(!openHelp);
   }
 
   function connectToAPI(){
@@ -188,25 +197,12 @@ function PageFramework(props) {
       }
       props.enqueueSnackbar(error, { variant: 'error' });
   }
-/*
-  function handleSearchChoice(contract) {
-    let openFiles = cookies.get('openfiles');
-    if(!openFiles){
-        cookies.set('openfiles', [contract])
-    }else{
-      if (openFiles.indexOf(contract) === -1){
-        openFiles.push(contract)
-        cookies.set('openfiles', openFiles) 
-      }
-    }
-    this.setState({ newContract: [contract] })
-  }
-*/
 
   return (
     <div className={classes.root}>
       <CssBaseline />
-     <Settings connectToAPI={() => connectToAPI()} openSettings={openSettings} toggleSettings={() => toggleSettings()}/>
+      <HelpDialog openHelp={openHelp} toggleHelp={() => toggleHelp()}/>
+      <Settings connectToAPI={() => connectToAPI()} openSettings={openSettings} toggleSettings={() => toggleSettings()}/>
       <AppBar
         position="fixed"
         className={clsx(classes.appBar, {
@@ -231,6 +227,7 @@ function PageFramework(props) {
           </Typography>
           <div className={classes.grow} />
           <Button color="inherit" onClick={() => toggleSettings()}>Settings</Button>
+          <Button color="inherit" onClick={() => toggleHelp()}>Help</Button>
         </Toolbar>
       </AppBar>
       <Drawer
@@ -278,7 +275,6 @@ function PageFramework(props) {
         <MonacoEditor 
           monacoRef={ref => setMonacoRef(ref)}
           apiStatus={apiStatus}
-          newContract={newContract}
           width={open ? ((windowState.width - drawerWidth)) : windowState.width}
           height={windowState.height}
           drawerOpen = {open}

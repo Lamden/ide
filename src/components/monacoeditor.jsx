@@ -4,19 +4,17 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
 import { withSnackbar } from 'notistack';
-import { Close, Add, CodeSharp } from '@material-ui/icons';
+import { Close, Add } from '@material-ui/icons';
 import Paper from '@material-ui/core/Paper';
 
 //Import Components
 import ErrorBox from "../components/errorbox";
 import MetaContract from "../components/metacontract";
+import EditTab from "../components/fragments/edittab";
 
 //Import Utils
 import * as API from '../js/contracting_api';
 import * as LShelpers from '../js/localstorage_helpers';
-
-import Cookies from 'universal-cookie';
-const cookies = new Cookies();
 
 const tabsHeight = 37;
 
@@ -43,9 +41,9 @@ const styles = theme => ({
     display: 'inline',
     height: tabsHeight + 'px',
     borderColor: '#45387F',
-    padding: '5px 12px',
+    padding: '8px 12px',
     marginRight: '1px',
-    lineHeight: '32px',
+    lineHeight: '35px',
     '&:focus': {outline:'0'}
   },
   tabButton: {
@@ -60,12 +58,13 @@ const styles = theme => ({
   tabUnselected: {
     backgroundColor: '#3b42c730',
   },
-  tabClose: {
+  tabIcon: {
     height: '16px',
     position: 'relative',
     top: '3px',
     left: '8px',
     width: '16px',
+    fill: '#512354',
   },
   newTab:{
     position: 'relative',
@@ -107,7 +106,7 @@ class MonacoWindow extends Component {
     import("monaco-editor")
       .then( monaco => {
         this.monaco = monaco;
-        this.editor = this.monaco.editor.create(document.getElementById("editor-container"), {automaticLayout: true});   
+        this.editor = this.monaco.editor.create(document.getElementById("editor-container"), {automaticLayout: true});  
         
         console.log(LShelpers.getFiles())   
 
@@ -157,9 +156,23 @@ class MonacoWindow extends Component {
     } 
   }
 
-  createNewModel = (code) => {
-    return this.monaco.editor.createModel(code, 'python');
+  refreshTabs = () => {
+    this.setState({ models: { local: new Map(), database: new Map() }, currentTab: {}},() => {
+      this.recoverTabs();
+    });
   }
+
+  createNewModel = (code) => {
+    const model = this.monaco.editor.createModel(code, 'python'); 
+    model.onDidChangeContent((event) => this.saveTabContent())
+    return model
+  }
+
+  saveTabContent = () => {
+    console.log(this.state.currentTab.name)
+    LShelpers.setFile(this.state.currentTab.name, this.editor.getValue(), 'local');
+  }
+
 
   createNewTab = (name, code, source) => {
     let StateModels = this.state.models;
@@ -212,6 +225,10 @@ class MonacoWindow extends Component {
     this.editor.setModel(StateModels['local'].values().next().value || this.brandNewTab())
     //delete from localstorage
     LShelpers.removeFile(name, source);
+  }
+
+  getTabValue  = (name, source) => {
+    return this.editor.getValue(this.state.models[source].get(name).id)
   }
 
   parentErrors = (error) => {
@@ -267,8 +284,16 @@ class MonacoWindow extends Component {
                             onClick={() =>  this.handleFileSwitching(index, 'local')}> 
                       {index} 
                     </button>
-                    <Close className={classNames(classes.tabClose)} 
-                           onClick={() =>  this.closeTab(index, 'local')}/>
+                    <span>
+                    <EditTab className={classNames(classes.tabIcon)}
+                             refreshTabs={() => this.refreshTabs()}
+                             getTabValue={(name) => this.getTabValue(name, 'local')}
+                             closeTab={(name) => this.closeTab(name, 'local')}
+                             tabName={index}
+                             />
+                      
+                    </span>
+
                   </div>  
                   )
     }
@@ -283,7 +308,7 @@ class MonacoWindow extends Component {
                             onClick={() =>  this.handleFileSwitching(index, 'database')}> 
                       { 'db: ' + index } 
                     </button>
-                    <Close className={classNames(classes.tabClose)} 
+                    <Close className={classNames(classes.tabIcon)} 
                            onClick={() =>  this.closeTab(index, 'database')}/>
                   </div>  
                   )
