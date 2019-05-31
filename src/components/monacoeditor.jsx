@@ -126,15 +126,13 @@ class MonacoWindow extends Component {
     switch(action) {
       case "Lint":
         this.props.enqueueSnackbar('Checking contract for errors...', { variant: 'info' });
-       // API.lint(this.props.ApiInfo, 'testName', this.getEditorValue()).then(data => this.handleErrors(data));
+        API.lint('testName', this.getEditorValue())
+          .then(data => this.handleErrors(data));
         break;
       case "Submit":
         this.props.enqueueSnackbar('Attempting to submit contract...', { variant: 'info' });
-        try{
-          API.submit_contract(this.props.ApiInfo, 'testName', this.getEditorValue()).then(data => this.handleErrors(data));
-        } catch (e) {
-          this.props.enqueueSnackbar(e.message, { variant: 'error' });
-        }
+        API.submit_contract('testName', this.getEditorValue())
+          .then(data => this.handleErrors(data));
         break;
       default:
         break;
@@ -225,6 +223,7 @@ class MonacoWindow extends Component {
     try{
       errorsObj = JSON.parse(errors)      
     }catch (e){
+      console.log('not proper json')
       this.setState({ errors: [e]});
       this.props.enqueueSnackbar('Errors Found!', { variant: 'error' });
       return
