@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
 import { withSnackbar } from 'notistack';
-import { Close, Add } from '@material-ui/icons';
+import { Close, Add, CodeSharp } from '@material-ui/icons';
 import Paper from '@material-ui/core/Paper';
 
 //Import Components
@@ -98,7 +98,7 @@ class MonacoWindow extends Component {
       this.editor = null; 
       this.monaco = null;
       this.startingWords = '# Welcome to the blockchain revolution';
-      this.newContractName = 'new contract ';
+      this.newContractName = 'Contract ';
       this.prevStatus = 'Offline';
   }
 
@@ -107,7 +107,12 @@ class MonacoWindow extends Component {
     import("monaco-editor")
       .then( monaco => {
         this.monaco = monaco;
-        this.editor = this.monaco.editor.create(document.getElementById("editor-container"), {automaticLayout: true});     
+        this.editor = this.monaco.editor.create(document.getElementById("editor-container"), {automaticLayout: true});   
+        
+        console.log(LShelpers.getFiles())   
+
+        this.recoverTabs();
+
       })
   }
 
@@ -136,29 +141,46 @@ class MonacoWindow extends Component {
     }
   }
 
+  recoverTabs = () => {
+    let LsFiles = LShelpers.getFiles();
+    console.log(LsFiles.local.size)
+    if (LsFiles.local.size > 0){
+      for (const [key, value] of LsFiles.local.entries()) {
+        this.createNewTab(key, value, 'local');
+      }
+    }else{
+      this.createNewTab('Contract 1', this.startingWords, 'local');
+    }
+
+    for (const [key, value] of LsFiles.database.entries()) {
+      API.contract(key)
+      .then(data => this.createNewTab(data.name, data.code, 'database'))
+      .catch(e => console.log(e));
+    } 
+  }
+
   createNewModel = (code) => {
     return this.monaco.editor.createModel(code, 'python');
   }
 
   createNewTab = (name, code, source) => {
-    let LsModels = LShelpers.getFiles();
     let StateModels = this.state.models;
 
-    if (!LsModels[source].has(name)){
+    if (!StateModels[source].has(name)){
       const model = this.createNewModel(code);
       StateModels[source].set(name, model);
       LShelpers.setFile(name, code, source);
       this.setState({ models: StateModels, currentTab: {name, id: model.id}});
     }
-      this.handleFileSwitching(name, source);
+    this.handleFileSwitching(name, source);
+  }
+
+  brandNewTab = () => {
+    this.createNewTab(this.newTabName(), this.startingWords, 'local')
   }
 
   getEditorValue = () =>{
     return this.editor.getValue();
-  }
-
-  setEditorValue = (value) =>{
-    this.createNewFile(value);
   }
 
   handleFileSwitching = (name, source) => {
@@ -169,61 +191,29 @@ class MonacoWindow extends Component {
     }
   }
 
-  openTab = (filename) => {
-    const models = LShelpers.getFiles();
-    models.forEach(model => {
-      switch(model.source) {
-        case "database":
-          API.contract(this.props.ApiInfo, filename)
-            .then(data => this.createModel(data.toString()))
-            .then(model => this.setState({ models: this.state.models.set(filename, model) }));
-          break;
-        case "localstorage":
-          if(null){return};
-          break;
-        default:
-          break;
-      }
-    });
-  }
-
-  createModel = (value) => {
-    const model = this.monaco.editor.createModel(value, 'python');
-    this.editor.getModel(model);
-    return model
-  }
-
-  newTab = () => {
+  newTabName = () => {
+    const LsFiles = LShelpers.getFiles().local;
     let i =1
     let done = false;
     do {
       const newName = this.newContractName + i;
-      if(!this.state.models.get(newName)){
-        this.createNewFile(newName, this.startingWords);
-        done = true
-        break;
+      if(LsFiles.has(newName)){
+        if (i === 20){done = true}
       }else{
-        if (i === 10){done = true}
+        return newName;
       }
       i = i + 1;
     } while (!done);    
   }
 
-  closeTab = (name) => {
-    let models = this.state.models;
-    models.delete(name)
-    this.setState({ models }, () => {
-      var openFiles = cookies.get('openfiles');
-      openFiles.splice(openFiles.indexOf(name))
-      cookies.set('openfiles', openFiles);
-      
-      const tabNames = Array.from( this.state.models.keys() );
-      if (tabNames.length > 0){
-        this.handleFileSwitching(tabNames[0])
-      }else{
-        this.createNewFile(this.newContractName + '1', this.startingWords,  );
-      }
-    })
+  closeTab = (name, source) => {
+    //delete from state
+    let StateModels = this.state.models;
+    StateModels[source].delete(name);
+    this.setState({ models: StateModels });
+    this.editor.setModel(StateModels['local'].values().next().value || this.brandNewTab())
+    //delete from localstorage
+    LShelpers.removeFile(name, source);
   }
 
   parentErrors = (error) => {
@@ -279,7 +269,7 @@ class MonacoWindow extends Component {
                       {index} 
                     </button>
                     <Close className={classNames(classes.tabClose)} 
-                           onClick={() =>  this.closeTab(index)}/>
+                           onClick={() =>  this.closeTab(index, 'local')}/>
                   </div>  
                   )
     }
@@ -295,7 +285,7 @@ class MonacoWindow extends Component {
                       { 'db: ' + index } 
                     </button>
                     <Close className={classNames(classes.tabClose)} 
-                           onClick={() =>  this.closeTab(index)}/>
+                           onClick={() =>  this.closeTab(index, 'database')}/>
                   </div>  
                   )
     }
@@ -303,7 +293,7 @@ class MonacoWindow extends Component {
         <div className={classNames(classes.root)}>
           <div className={classNames(classes.tabRow)}>
             <span>
-                <Add onClick={() =>  this.newTab()} className={classNames(classes.newTab)} />
+                <Add onClick={() =>  this.brandNewTab()} className={classNames(classes.newTab)} />
             </span>
             <span>
               {tabs}

@@ -126,12 +126,12 @@ function Settings(props) {
           aria-controls="panel2a-content"
           id="panel2a-header"
         >
-          <Typography className={classes.heading}>More Settings</Typography>
+          <Typography className={classes.heading}>Danger Zone</Typography>
         </ExpansionPanelSummary>
         <ExpansionPanelDetails>
-        <Typography>
-            Set some more settings here 
-          </Typography>
+        <Button onClick={() => LShelpers.init_file_storage()}>
+          Wipe Local Storage
+        </Button>
         </ExpansionPanelDetails>
       </ExpansionPanel>
       <div className={classes.buttons}>
