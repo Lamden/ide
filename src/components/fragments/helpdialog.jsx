@@ -59,7 +59,6 @@ function HelpDialog(props) {
               </div>
               <div>
                 2. Run 'Python3 contracting/webserver.py' to start the dev server.
-              <a href='https://github.com/Lamden/contracting' target="_blank" rel="noopener noreferrer" >{'github'}</a>
               </div>
               <div>
                 3. Go to settings and setup the hostname and port of your dev server

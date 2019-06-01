@@ -134,9 +134,11 @@ function Settings(props) {
           Clicking this button will wipe all contracts and settings from the local browser storange.  
           You will lose all information if you have not downloaded your tabs to files.
         </Typography>
-        <Button onClick={() => LShelpers.init_storage()}>
-          Wipe Local Storage
-        </Button>
+        <div>
+          <Button onClick={() => LShelpers.init_storage()}>
+            Wipe Local Storage
+          </Button>
+        </div>
         </ExpansionPanelDetails>
       </ExpansionPanel>
       <div className={classes.buttons}>
