@@ -34,22 +34,23 @@ const useStyles = makeStyles(theme => ({
   },
   button: {
     margin: '10px',
+  },
+  warning:{
+    color: 'red'
   }
 }));
 
 function Settings(props) {
   const classes = useStyles();
-  const [initialized, setInitialized] = useState(false);
   const [open, setOpen] = useState(false);
   const [savedApiInfo, setSavedApiInfo] = useState(false);
   
 
   useEffect(() => {
-    if (!initialized) {
+    if (props.initialized) {
       setSavedApiInfo(LShelpers.getApiInfo())
-      setInitialized(true);
     }
-  });
+  },[props.initialized]);
 
   useEffect(() => {
       setOpen(props.openSettings)
@@ -106,7 +107,7 @@ function Settings(props) {
               className={classNames(classes.margin, classes.textField)}
               onChange={handleHostnameChange()}
               margin="normal"
-              defaultValue={ LShelpers.getApiInfo().hostname }
+              defaultValue={ props.initialized ? LShelpers.getApiInfo().hostname : '' }
               helperText="blank for http:\\localhost"
             />
             <TextField
@@ -115,7 +116,7 @@ function Settings(props) {
               className={classNames(classes.margin, classes.textField)}
               onChange={handlePortChange()}
               margin="normal"
-              defaultValue={ LShelpers.getApiInfo().port }
+              defaultValue={ props.initialized ? LShelpers.getApiInfo().port : '' }
               helperText="blank for port 8080"
             />
         </ExpansionPanelDetails>
@@ -129,7 +130,11 @@ function Settings(props) {
           <Typography className={classes.heading}>Danger Zone</Typography>
         </ExpansionPanelSummary>
         <ExpansionPanelDetails>
-        <Button onClick={() => LShelpers.init_file_storage()}>
+        <Typography className={classes.warning}>
+          Clicking this button will wipe all contracts and settings from the local browser storange.  
+          You will lose all information if you have not downloaded your tabs to files.
+        </Typography>
+        <Button onClick={() => LShelpers.init_storage()}>
           Wipe Local Storage
         </Button>
         </ExpansionPanelDetails>
@@ -143,9 +148,11 @@ function Settings(props) {
 
   return (
     <div>
+      { props.initialized ?
         <Drawer anchor="top" open={open} onClose={() => handleClose()}>
           {fullList('top')}
         </Drawer>
+      : null}
     </div>
   );
 

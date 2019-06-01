@@ -1,26 +1,42 @@
 //globalstate
 export function firstRun() {
-    if (localStorage.getItem('apiInfo')){
-        localStorage.setItem('firstRun', false);
-        return true;
-    }
-    return false
+        if (!localStorage.getItem('firstRun')){
+            localStorage.setItem('firstRun', false);
+            init_storage();
+            return true;
+        }
+        return false
+}
+
+function init_storage(){
+    localStorage.clear();
+    init_apiInfo();
+    init_file_storage();
 }
 
 // API Functions
 
-export function getApiInfo() {
+export function init_apiInfo() {
     let apiInfo = {status: 'Offline', hostname: 'http:\\\\localhost', port: '8080'}
-    try {
-        apiInfo = JSON.parse(localStorage.getItem('apiInfo'));
-    } catch {
-        setApiInfo(apiInfo)
+    localStorage.setItem('apiInfo', JSON.stringify(apiInfo));
+}
+
+export function getApiInfo() {
+    if (typeof window !== `undefined`) {
+        let apiInfo = {status: 'Offline', hostname: 'http:\\\\localhost', port: '8080'}
+        try {
+            apiInfo = JSON.parse(localStorage.getItem('apiInfo'));
+        } catch {
+            setApiInfo(apiInfo)
+        }
+        return apiInfo
     }
-    return apiInfo
 }
 
 export function setApiInfo(apiInfo) {
-    localStorage.setItem('apiInfo', JSON.stringify(apiInfo));
+    if (typeof window !== `undefined`) {
+        localStorage.setItem('apiInfo', JSON.stringify(apiInfo));
+    }
 }
 
 //Open Tab Storage
@@ -34,10 +50,12 @@ export function init_file_storage() {
 }
 
 function json_to_map_files() {
-    let files = JSON.parse(localStorage.getItem('files'));
-    files.local = jsonToStrMap(files.local);
-    files.database = jsonToStrMap(files.database);
-    return files
+    if (typeof window !== `undefined`) {
+        let files = JSON.parse(localStorage.getItem('files'));
+        files.local = jsonToStrMap(files.local);
+        files.database = jsonToStrMap(files.database);
+        return files
+    }
 }
 
 function map_to_json_files(files) {
@@ -47,7 +65,9 @@ function map_to_json_files(files) {
 }
 
 function storeFilesObj(files){
-    localStorage.setItem('files', JSON.stringify(map_to_json_files(files)));
+    if (typeof window !== `undefined`) {
+        localStorage.setItem('files', JSON.stringify(map_to_json_files(files)));
+    }
 }
 
 function getFilesObj(){
@@ -67,7 +87,6 @@ export function setFile(name, code, source) {
     if (files){
         files[source].set(name, code);
         storeFilesObj(files);
-        console.log('saved')
         return files
     }
 }

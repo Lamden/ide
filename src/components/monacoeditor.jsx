@@ -107,9 +107,6 @@ class MonacoWindow extends Component {
       .then( monaco => {
         this.monaco = monaco;
         this.editor = this.monaco.editor.create(document.getElementById("editor-container"), {automaticLayout: true});  
-        
-        console.log(LShelpers.getFiles())   
-
         this.recoverTabs();
 
       })
@@ -140,7 +137,6 @@ class MonacoWindow extends Component {
 
   recoverTabs = () => {
     let LsFiles = LShelpers.getFiles();
-    console.log(LsFiles.local.size)
     if (LsFiles.local.size > 0){
       for (const [key, value] of LsFiles.local.entries()) {
         this.createNewTab(key, value, 'local');
@@ -169,7 +165,6 @@ class MonacoWindow extends Component {
   }
 
   saveTabContent = () => {
-    console.log(this.state.currentTab.name)
     LShelpers.setFile(this.state.currentTab.name, this.editor.getValue(), 'local');
   }
 
@@ -198,6 +193,7 @@ class MonacoWindow extends Component {
     const model = this.state.models[source].get(name);
     if (model){
       this.editor.setModel(model);
+      this.editor.updateOptions({ readOnly: source === 'database' ? true : false })
       this.setState({currentTab: {name, id: model['id']}})
     }
   }
@@ -240,7 +236,6 @@ class MonacoWindow extends Component {
     try{
       errorsObj = JSON.parse(errors)      
     }catch (e){
-      console.log('not proper json')
       this.setState({ errors: [e]});
       this.props.enqueueSnackbar('Errors Found!', { variant: 'error' });
       return

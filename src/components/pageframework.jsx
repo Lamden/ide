@@ -128,6 +128,7 @@ function PageFramework(props) {
   const [initialized, setInitialized] = useState(false);
   const [apiStatus, setApiStatus] = useState(undefined);
   const [windowState, setWindowState] = useState({ height: 0, width:0 });
+  const [windowLoaded, setWindowLoaded] = useState(false);
 
   //Set Refs
   const [monacoEditor, setMonacoEditor] = useState(undefined);
@@ -136,28 +137,36 @@ function PageFramework(props) {
   }
 
   useEffect(() => {
-    const setFromEvent = e => setWindowState({ height: e.target.innerHeight, width: e.target.innerWidth });
-    window.addEventListener('resize', setFromEvent);
-    return () => {
+      const setFromEvent = e => setWindowState({ height: e.target.innerHeight, width: e.target.innerWidth });
       window.addEventListener('resize', setFromEvent);
-    };
+      return () => {
+        window.addEventListener('resize', setFromEvent);
+    }
   }, []);
 
   useEffect(() => {
-    if (!initialized) {
+    if (!windowLoaded){
+      if (typeof window !== 'undefined' && window){
+        setWindowLoaded(true)
+      }
+    }
+  }, [windowLoaded]);
+
+  useEffect(() => {
+    if (!initialized && windowLoaded) {
       setWindowState({height: window.innerHeight, width: window.innerWidth})
+
       if (LShelpers.firstRun()){
-        console.log('firstrun')
         setOpenHelp(true)
       }
       connectToAPI();
       setInitialized(true);
     }
-  }, [initialized]);
+  }, [initialized, windowLoaded]);
 
   useEffect(() => {
     if (apiStatus === undefined) {return}
-    props.enqueueSnackbar('API Server ' + apiStatus, { variant: apiStatus !== 'Online' ? apiStatus === 'Connecting...' ? 'info' : 'default'  : 'success' });
+      props.enqueueSnackbar('API Server ' + apiStatus, { variant: apiStatus !== 'Online' ? apiStatus === 'Connecting...' ? 'info' : 'default'  : 'success' });
   }, [apiStatus]);
 
   function handleDrawerOpen() {
@@ -201,8 +210,13 @@ function PageFramework(props) {
   return (
     <div className={classes.root}>
       <CssBaseline />
-      <HelpDialog openHelp={openHelp} toggleHelp={() => toggleHelp()}/>
-      <Settings connectToAPI={() => connectToAPI()} openSettings={openSettings} toggleSettings={() => toggleSettings()}/>
+      <HelpDialog openHelp={openHelp} toggleHelp={() => toggleHelp()}/> 
+      {initialized ?
+        <Settings initialized={initialized}
+                  connectToAPI={() => connectToAPI()} 
+                  openSettings={openSettings} 
+                  toggleSettings={() => toggleSettings()}/>
+      : null}
       <AppBar
         position="fixed"
         className={clsx(classes.appBar, {
@@ -261,17 +275,18 @@ function PageFramework(props) {
               </ListItemIcon>
               <ListItemText primary={'API ' + apiStatus} />
             </ListItem>
-            <ListItem button key='Lint' onClick={() => monacoEditor.clickController('Lint')}>
+            <ListItem disabled={apiStatus === 'Online' ? false : true } button key='Lint' onClick={() => monacoEditor.clickController('Lint')}>
               <ListItemIcon><CheckCircleOutline /></ListItemIcon>
               <ListItemText primary='Error Check' />
             </ListItem>
-            <ListItem button key='Submit' onClick={() => monacoEditor.clickController('Submit')}>
+            <ListItem disabled={apiStatus === 'Online' ? false : true } button key='Submit' onClick={() => monacoEditor.clickController('Submit')}>
               <ListItemIcon><Publish /></ListItemIcon>
               <ListItemText primary='Submit' />
             </ListItem>
           </List>
       </Drawer>
       <main className={classes.content}>
+        {initialized  ?
         <MonacoEditor 
           monacoRef={ref => setMonacoRef(ref)}
           apiStatus={apiStatus}
@@ -279,6 +294,7 @@ function PageFramework(props) {
           height={windowState.height}
           drawerOpen = {open}
         />
+        : <div><br></br><br></br><br></br><br></br><br></br><br></br><br></br>'...Loading Editor...'</div> }
       </main>
     </div>
   )

@@ -42,15 +42,15 @@ function HelpDialog(props) {
         onClose={handleClose}
         aria-labelledby="max-width-dialog-title"
       >
-        <DialogTitle id="max-width-dialog-title">Optional sizes</DialogTitle>
+        <DialogTitle id="max-width-dialog-title">Help</DialogTitle>
         <DialogContent>
           <DialogContentText>
             <div className={classes.section}>
             Quick Start
             </div>
             <div>
-              To use the Lamden Contracting site you need to attach it to a development server to and validate your contracts
-               ahear to the Lamden Contracting standards.
+              To use the Lamden Contracting site you need to attach it to a development server. This will allow you to create, validate and test your contracts
+               before making them live on Lamden's blockchain.
             </div>
             <div className={classes.list}>
               <div>
@@ -58,7 +58,11 @@ function HelpDialog(props) {
               <a href='https://github.com/Lamden/contracting' target="_blank" rel="noopener noreferrer" >{'github'}</a>
               </div>
               <div>
-                2. Go to settings and setup the hostname and port of your dev server
+                2. Run 'Python3 contracting/webserver.py' to start the dev server.
+              <a href='https://github.com/Lamden/contracting' target="_blank" rel="noopener noreferrer" >{'github'}</a>
+              </div>
+              <div>
+                3. Go to settings and setup the hostname and port of your dev server
               </div>
             </div>
             <div className={classes.section}>

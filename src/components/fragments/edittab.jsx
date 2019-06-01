@@ -129,7 +129,7 @@ function EditTab(props) {
           <div className={classes.popoverClose}>
             <div >
               <div>
-                <Typography>All content in this tab will delete</Typography>
+                <Typography>All content in this tab will be deleted</Typography>
               </div>
               <div>
                 <Typography>Are you sure?</Typography>
