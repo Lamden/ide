@@ -1,7 +1,6 @@
 //globalstate
 export function firstRun() {
         if (!localStorage.getItem('firstRun')){
-            localStorage.setItem('firstRun', false);
             init_storage();
             return true;
         }
@@ -10,6 +9,7 @@ export function firstRun() {
 
 function init_storage(){
     localStorage.clear();
+    localStorage.setItem('firstRun', false);
     init_apiInfo();
     init_file_storage();
 }
