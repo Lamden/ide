@@ -157,11 +157,7 @@ function PageFramework(props) {
       setWindowState({height: window.innerHeight, width: window.innerWidth})
 
       if (LShelpers.firstRun()){
-<<<<<<< Updated upstream
-        setOpenHelp(true)
-=======
         setOpenHelp(!LShelpers.firstRun())
->>>>>>> Stashed changes
       }
       connectToAPI();
       setInitialized(true);

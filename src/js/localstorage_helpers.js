@@ -1,19 +1,5 @@
 //globalstate
 export function firstRun() {
-<<<<<<< Updated upstream
-        if (!localStorage.getItem('firstRun')){
-            init_storage();
-            return true;
-        }
-        return false
-}
-
-function init_storage(){
-    localStorage.clear();
-    localStorage.setItem('firstRun', false);
-    init_apiInfo();
-    init_file_storage();
-=======
     if (typeof window !== `undefined`) {
         if (localStorage.getItem('firstRun')){
             localStorage.setItem('firstRun', false);
@@ -21,22 +7,13 @@ function init_storage(){
         }
         return false
     }
->>>>>>> Stashed changes
 }
 
 // API Functions
 
-<<<<<<< Updated upstream
-export function init_apiInfo() {
-    let apiInfo = {status: 'Offline', hostname: 'http:\\\\localhost', port: '8080'}
-    localStorage.setItem('apiInfo', JSON.stringify(apiInfo));
-}
-
-=======
->>>>>>> Stashed changes
 export function getApiInfo() {
     if (typeof window !== `undefined`) {
-        let apiInfo = {status: 'Offline', hostname: 'http:\\\\localhost', port: '8080'}
+        let apiInfo = {status: 'Offline', hostname: 'http://localhost', port: '8080'}
         try {
             apiInfo = JSON.parse(localStorage.getItem('apiInfo'));
         } catch {
