@@ -107,11 +107,7 @@ function Settings(props) {
               className={classNames(classes.margin, classes.textField)}
               onChange={handleHostnameChange()}
               margin="normal"
-<<<<<<< Updated upstream
-              defaultValue={ props.initialized ? LShelpers.getApiInfo().hostname : '' }
-=======
               defaultValue={ typeof window !== `undefined` ? LShelpers.getApiInfo().hostname : '' }
->>>>>>> Stashed changes
               helperText="blank for http:\\localhost"
             />
             <TextField
@@ -120,11 +116,7 @@ function Settings(props) {
               className={classNames(classes.margin, classes.textField)}
               onChange={handlePortChange()}
               margin="normal"
-<<<<<<< Updated upstream
-              defaultValue={ props.initialized ? LShelpers.getApiInfo().port : '' }
-=======
               defaultValue={ typeof window !== `undefined` ? LShelpers.getApiInfo().port : '' }
->>>>>>> Stashed changes
               helperText="blank for port 8080"
             />
         </ExpansionPanelDetails>

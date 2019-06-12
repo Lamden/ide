@@ -9,12 +9,12 @@ Clone the repo:
 git clone https://github.com/Lamden/ide.git
 ```
 
-Install dependancies (may have to sudo):
+Install Dependencies (may have to sudo):
 ```
 npm install
 ```
 
-Build the serve the website:
+Build and serve the website:
 ```
 gatsby build && gatsby serve
 ```
@@ -22,6 +22,6 @@ gatsby build && gatsby serve
 Once instructed, browse to:
 > http://localhost:9000
 
-# Adding an API server
+## Adding an API server
 
 You can add an API server by going to the setting menu in the top left
