@@ -106,7 +106,16 @@ class MonacoWindow extends Component {
     import("monaco-editor")
       .then( monaco => {
         this.monaco = monaco;
+<<<<<<< Updated upstream
         this.editor = this.monaco.editor.create(document.getElementById("editor-container"), {automaticLayout: true});  
+=======
+        this.editor = this.monaco.editor.create(document.getElementById("editor-container"), 
+          {
+           theme: 'vs-dark',
+           automaticLayout: true,
+          }
+        );  
+>>>>>>> Stashed changes
         this.recoverTabs();
 
       })

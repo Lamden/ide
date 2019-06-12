@@ -1,5 +1,6 @@
 //globalstate
 export function firstRun() {
+<<<<<<< Updated upstream
         if (!localStorage.getItem('firstRun')){
             init_storage();
             return true;
@@ -12,15 +13,27 @@ function init_storage(){
     localStorage.setItem('firstRun', false);
     init_apiInfo();
     init_file_storage();
+=======
+    if (typeof window !== `undefined`) {
+        if (localStorage.getItem('firstRun')){
+            localStorage.setItem('firstRun', false);
+            return true;
+        }
+        return false
+    }
+>>>>>>> Stashed changes
 }
 
 // API Functions
 
+<<<<<<< Updated upstream
 export function init_apiInfo() {
     let apiInfo = {status: 'Offline', hostname: 'http:\\\\localhost', port: '8080'}
     localStorage.setItem('apiInfo', JSON.stringify(apiInfo));
 }
 
+=======
+>>>>>>> Stashed changes
 export function getApiInfo() {
     if (typeof window !== `undefined`) {
         let apiInfo = {status: 'Offline', hostname: 'http:\\\\localhost', port: '8080'}
@@ -118,7 +131,6 @@ export function renameTab(oldName, newName, tabValue){
             storeFilesObj(files)
             return true
         } catch (e) {
-            console.log(e)
             return false
         }
 }
