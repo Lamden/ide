@@ -16,16 +16,8 @@ const useStyles = makeStyles(theme => ({
 export default function pluginButton(props) {
     const classes = useStyles();
     const [pluginInstalled, setPluginInstalled] = useState(false);
-    const [pluginUnlocked, setPluginUnlocked] = useState(false);
-
-    const eventWalletCheck = new CustomEvent("signPluginCheck", {bubbles: true});
-    const eventUnlockCheck = new CustomEvent("signTx", {
-        bubbles: true,
-        detail: {
-            network: "DTAU", 
-            address: "Jeff", 
-            rawTx: "stuff",
-        },
+    const [pluginLocked, setPluginLocked] = useState((prevState) => {
+        return {...prevState, pluginLocked}
     });
 
     useEffect(() => {
@@ -37,47 +29,57 @@ export default function pluginButton(props) {
             window.addEventListener('message', function(event) {
                 handleSignedTxMessage(event);
             });
+            const eventWalletCheck = new CustomEvent("signPluginCheck", {bubbles: true});
 
             document.dispatchEvent(eventWalletCheck);
         }
     }, [props.initialized]);
 
     useEffect(() => {
-        console.log(pluginInstalled);
         if (pluginInstalled){
-            console.log('checking locked wallet')
-
+            const eventUnlockCheck = new CustomEvent("signTx", {
+                bubbles: true,
+                detail: {},
+            });
             document.dispatchEvent(eventUnlockCheck);
         }
     }, [pluginInstalled]);
 
+    useEffect(() => {
+        console.log('value changed to ' + pluginLocked);
+    }, []);
+
     function handleSignedTxMessage(e) {
-       if (e.source === window && e.data){
-            if (e.data.error === "Storage is locked") {
-                setPluginUnlocked(false);
-            }else{
-                setPluginUnlocked(true);
+        console.log(e.data);
+        if (e.source === window && e.data){
+            if (e.data.type === 'locked' ){
+                console.log(e.data.locked ? 'wallet is locked' :  'wallet is unlocked' )
+                console.log(pluginLocked ? 'icon is closed lock' :  'icon is open lock' )
+                console.log(e.data.locked !== pluginLocked ? 'changing icon' : 'not chaning icon')
+                if (e.data.locked !== pluginLocked){
+                    setPluginLocked(e.data.locked);
+                }
+            }
+
+            if (e.data.type === 'signedTx') {
+                if (e.data.error === "Storage is locked"){
+                    setPluginLocked(true);
+                }else{
+                    setPluginLocked(false);
+                }
             }
        }
     }
-
-
 
   return (
 
     <div>
         { pluginInstalled ?
-            pluginUnlocked ?
                 <Button variant="contained" color="primary" className={classes.button}>
                     Vault Installed
-                    <LockOpen className={classes.buttonIcon}/>
+                    {pluginLocked ? <Lock className={classes.buttonIcon}/> : <LockOpen className={classes.buttonIcon}/>}
                 </Button>
-            :
-                <Button variant="contained" color="primary" className={classes.button}>
-                    Vault Installed
-                    <Lock className={classes.buttonIcon}/>
-                </Button>
-            
+
         :
             <Button href="https://docs.lamden.io/lamden-vault/" target="_blank" rel="noopener noreferrer"
                     variant="contained" color="secondary" className={classes.button} >     
