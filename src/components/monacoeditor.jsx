@@ -132,7 +132,7 @@ class MonacoWindow extends Component {
         break;
       case "Submit":
         this.props.enqueueSnackbar('Attempting to submit contract...', { variant: 'info' });
-        API.submit_contract('testName', this.getEditorValue())
+        API.submit_contract(this.state.currentTab.name, this.getEditorValue())
           .then(data => this.handleErrors(data));
         break;
       default:
@@ -250,6 +250,7 @@ class MonacoWindow extends Component {
       this.setState({ errors: ['ok'] });
       if (errorsObj.success){
         this.props.enqueueSnackbar('Contract successfully submitted!', { variant: 'success' });
+        
       }else{
         this.props.enqueueSnackbar('Contract has 0 Errors!', { variant: 'success' });
 

@@ -13,7 +13,7 @@ export function firstRun() {
 
 export function getApiInfo() {
     if (typeof window !== `undefined`) {
-        let apiInfo = {status: 'Offline', hostname: 'http://localhost', port: '8080'}
+        let apiInfo = {status: 'Offline', hostname: 'https://contracting.lamden.io', port: '443'}
         try {
             apiInfo = JSON.parse(localStorage.getItem('apiInfo'));
         } catch {

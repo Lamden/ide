@@ -72,9 +72,9 @@ function Settings(props) {
 
   function handleClose() {
     let apiInfo = LShelpers.getApiInfo(); 
-    apiInfo.hostname = apiInfo.hostname === '' ? 'http://localhost' : apiInfo.hostname;
-    apiInfo.hostname = apiInfo.hostname.indexOf('http://') === 0 || apiInfo.hostname.indexOf('https://')  === 0 ? apiInfo.hostname : 'http://' + apiInfo.hostname;
-    apiInfo.port = apiInfo.port === '' ? '8080' : apiInfo.port;
+    apiInfo.hostname = apiInfo.hostname === '' ? 'https://contracting.lamden.io' : apiInfo.hostname;
+    apiInfo.hostname = apiInfo.hostname.indexOf('http://') === 0 || apiInfo.hostname.indexOf('https://')  === 0 ? apiInfo.hostname : 'https://' + apiInfo.hostname;
+    apiInfo.port = apiInfo.port === '' ? '443' : apiInfo.port;
     LShelpers.setApiInfo(apiInfo);
     if(JSON.stringify(apiInfo) !== JSON.stringify(savedApiInfo) ){ props.connectToAPI(); }
     setSavedApiInfo(apiInfo);
@@ -108,7 +108,7 @@ function Settings(props) {
               onChange={handleHostnameChange()}
               margin="normal"
               defaultValue={ typeof window !== `undefined` ? LShelpers.getApiInfo().hostname : '' }
-              helperText="blank for http:\\localhost"
+              helperText="blank for https://contracting.lamden.io"
             />
             <TextField
               id="api-port"
@@ -117,7 +117,7 @@ function Settings(props) {
               onChange={handlePortChange()}
               margin="normal"
               defaultValue={ typeof window !== `undefined` ? LShelpers.getApiInfo().port : '' }
-              helperText="blank for port 8080"
+              helperText="blank for port 443"
             />
         </ExpansionPanelDetails>
       </ExpansionPanel>
