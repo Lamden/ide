@@ -117,6 +117,11 @@ const useStyles = makeStyles(theme => ({
   },
   statusPending: {
     fill: 'orange',
+  },
+  pluginButton: {
+    [theme.breakpoints.only('xs')]: {
+      display: 'none',
+    }
   }
 }));
 
@@ -242,7 +247,9 @@ function PageFramework(props) {
             Lamden Contracting
           </Typography>
           <div className={classes.grow} />
-          <PluginButton initialized={initialized}/>
+          <div className={classes.pluginButton}>
+            <PluginButton initialized={initialized}   />
+          </div>
           <Button color="inherit" onClick={() => toggleSettings()}>Settings</Button>
           <Button color="inherit" onClick={() => toggleHelp()}>Help</Button>
         </Toolbar>
