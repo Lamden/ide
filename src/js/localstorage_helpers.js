@@ -9,6 +9,15 @@ export function firstRun() {
     }
 }
 
+export function init_storage() {
+    if (typeof window !== `undefined`) {
+        init_file_storage();
+        localStorage.setItem('firstRun', true);
+        let apiInfo = {status: 'Offline', hostname: 'https://contracting.lamden.io', port: '443'};
+        setApiInfo(apiInfo);
+    }
+}
+
 // API Functions
 
 export function getApiInfo() {
