@@ -159,7 +159,7 @@ function PageFramework(props) {
       setWindowState({height: window.innerHeight, width: window.innerWidth})
 
       if (LShelpers.firstRun()){
-        setOpenHelp(!LShelpers.firstRun())
+        setOpenHelp(!LShelpers.firstRun());
       }
       connectToAPI();
       setInitialized(true);

@@ -1,20 +1,23 @@
 //globalstate
+const apiInfoDefault = {status: 'Offline', hostname: 'https://contracting.lamden.io', port: '443'};
+
 export function firstRun() {
     if (typeof window !== `undefined`) {
+        //If the firstRun property is set in localstorage then it is NOT the first run regardless of the value
         if (localStorage.getItem('firstRun')){
-            localStorage.setItem('firstRun', false);
             return true;
         }
-        return false
+        //If the firstRun property doesn't exist then we need to initiate the localstorage
+        localStorage.setItem('firstRun', false);
+        init_storage();
+        return true;
     }
 }
 
 export function init_storage() {
     if (typeof window !== `undefined`) {
         init_file_storage();
-        localStorage.setItem('firstRun', true);
-        let apiInfo = {status: 'Offline', hostname: 'https://contracting.lamden.io', port: '443'};
-        setApiInfo(apiInfo);
+        setApiInfo(apiInfoDefault);
     }
 }
 
@@ -22,7 +25,7 @@ export function init_storage() {
 
 export function getApiInfo() {
     if (typeof window !== `undefined`) {
-        let apiInfo = {status: 'Offline', hostname: 'https://contracting.lamden.io', port: '443'}
+        let apiInfo = apiInfoDefault
         try {
             apiInfo = JSON.parse(localStorage.getItem('apiInfo'));
         } catch {

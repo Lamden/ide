@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import clsx from 'clsx';
 import { Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { Lock, LockOpen } from '@material-ui/icons';
@@ -45,17 +44,9 @@ export default function pluginButton(props) {
         }
     }, [pluginInstalled]);
 
-    useEffect(() => {
-        console.log('value changed to ' + pluginLocked);
-    }, []);
-
     function handleSignedTxMessage(e) {
-        console.log(e.data);
         if (e.source === window && e.data){
             if (e.data.type === 'locked' ){
-                console.log(e.data.locked ? 'wallet is locked' :  'wallet is unlocked' )
-                console.log(pluginLocked ? 'icon is closed lock' :  'icon is open lock' )
-                console.log(e.data.locked !== pluginLocked ? 'changing icon' : 'not chaning icon')
                 if (e.data.locked !== pluginLocked){
                     setPluginLocked(e.data.locked);
                 }
