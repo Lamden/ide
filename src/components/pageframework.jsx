@@ -19,9 +19,10 @@ import { withSnackbar } from 'notistack';
 
 
 //Import Components
+import PluginButton from "../components/fragments/pluginButton";
 import Settings from "../components/settings";
 import MonacoEditor from "../components/monacoeditor";
-import HelpDialog from "../components/fragments/helpdialog"
+import HelpDialog from "../components/fragments/helpdialog";
 
 //Import Utils
 import * as API from '../js/contracting_api';
@@ -130,6 +131,7 @@ function PageFramework(props) {
   const [windowState, setWindowState] = useState({ height: 0, width:0 });
   const [windowLoaded, setWindowLoaded] = useState(false);
 
+
   //Set Refs
   const [monacoEditor, setMonacoEditor] = useState(undefined);
   function setMonacoRef (ref){
@@ -140,7 +142,7 @@ function PageFramework(props) {
       const setFromEvent = e => setWindowState({ height: e.target.innerHeight, width: e.target.innerWidth });
       window.addEventListener('resize', setFromEvent);
       return () => {
-        window.addEventListener('resize', setFromEvent);
+        window.removeEventListener('resize', setFromEvent);
     }
   }, []);
 
@@ -240,6 +242,7 @@ function PageFramework(props) {
             Lamden Contracting
           </Typography>
           <div className={classes.grow} />
+          <PluginButton initialized={initialized}/>
           <Button color="inherit" onClick={() => toggleSettings()}>Settings</Button>
           <Button color="inherit" onClick={() => toggleHelp()}>Help</Button>
         </Toolbar>

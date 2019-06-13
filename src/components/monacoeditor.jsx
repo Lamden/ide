@@ -76,7 +76,7 @@ const styles = theme => ({
     height: '80%'
   },
   editorRow: {
-    display: 'flex'
+    display: 'flex',
   },
   metaBox:{
     width: '100%',

@@ -25,6 +25,9 @@ const styles = ({
     headingPass: {
         backgroundColor: '#86e686'
     },
+    boxRows: {
+        overflowY: 'scroll',
+    },
     errorLine: {
         '&:hover' : {
             backgroundColor: '#574690',
@@ -78,20 +81,22 @@ class ErrorBox extends Component {
                                             [classes.headingErrors]: (errors.length > 0) })}>
                     {'Console: '}
                 </div>
+                <div className={classNames(classes.boxRows)}>
 
-                {errors ? 
-                    errors.map((error, i) => { 
-                        return (
-                            <div key={i}>
-                                <div className={classNames(classes.errorLine)}>
-                                    <span className={classNames(classes.number)}>{(i+ 1) + ' - '}</span>
-                                    <span className={classNames({}, {[classes.textNormal]: errors.length === 1 && (errors[0] === 'ok' || errors[0] === 'success!')})}>{error}</span>
+                    {errors ? 
+                        errors.map((error, i) => { 
+                            return (
+                                <div key={i}>
+                                    <div className={classNames(classes.errorLine)}>
+                                        <span className={classNames(classes.number)}>{(i+ 1) + ' - '}</span>
+                                        <span className={classNames({}, {[classes.textNormal]: errors.length === 1 && (errors[0] === 'ok' || errors[0] === 'success!')})}>{error}</span>
+                                    </div>
+                                    <Divider variant="middle"/>
                                 </div>
-                                <Divider variant="middle"/>
-                            </div>
-                        ) })
-                : null
-                }
+                            ) })
+                    : null
+                    }
+                </div>
             </div>
         );
     }
