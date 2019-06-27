@@ -200,11 +200,7 @@ function PageFramework(props) {
   }
 
   function handleApiError(error) {
-    console.log(error.name)
-
     setApiStatus('Offline')
-        
-    const apiInfo = LShelpers.getApiInfo();
     
       if (!error){
         props.enqueueSnackbar('Unknown API Server Error', { variant: 'error' });

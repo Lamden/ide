@@ -219,8 +219,8 @@ class ContractSearch extends React.Component {
           this.props.enqueueSnackbar('Unknown API Server Error', { variant: 'error' });
           return
         } 
-        if (error.name === 'FetchError'){
-          this.props.enqueueSnackbar(error.code +' error: unable to connect to API endpoint ' + apiInfo.hostname + ':' + apiInfo.port + '. Check API settings.', { variant: 'error' });
+        if (error.name === 'FetchError' || error.message === 'Failed to fetch'){
+          props.enqueueSnackbar(error.message + '. Check API settings.', { variant: 'error' });
           return;
         }
         this.props.enqueueSnackbar(error.message, { variant: 'error' });
