@@ -80,13 +80,23 @@ class MetaContract extends Component {
     getMeta = (name) => {
         if (name){
             API.methods(name)
-            .then(data => !data.error ? this.setState({methods: data.methods}) : null);
+                .then(data => this.setState({methods: data.methods}))
+                .catch(err => this.handleApiError(err));
             API.variables(name)
-            .then(data => !data.error ? this.setState({variables: data.variables}) : null);
+                .then(data => this.setState({variables: data.variables}))
+                .catch(err => this.handleApiError(err));
         }else{
             this.setState({methods: undefined, variables: undefined})
         }
       }
+
+    handleApiError = (error) => {    
+        if (!error){
+            this.props.enqueueSnackbar('Unknown API Server Error', { variant: 'error' });
+            return
+        } 
+        this.props.enqueueSnackbar(error.message, { variant: 'error' });
+    }
 
     render() {
         const { classes } = this.props

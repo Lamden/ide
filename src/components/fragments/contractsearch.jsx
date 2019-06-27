@@ -13,6 +13,7 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import { emphasize } from '@material-ui/core/styles/colorManipulator';
 
 import * as API from '../../js/contracting_api';
+import * as LShelpers from '../../js/localstorage_helpers';
 
 const styles = theme => ({
   root: {
@@ -208,7 +209,21 @@ class ContractSearch extends React.Component {
     openCode = () => {
       API.contract(this.state.single.value)
         .then(data => this.props.openCode(data.name, data.code, 'database'))
-        .catch(e => console.log(e));
+        .catch(err => this.handleApiError(err));
+    }
+
+    handleApiError =(error) => {
+      const apiInfo = LShelpers.getApiInfo();
+      
+        if (!error){
+          this.props.enqueueSnackbar('Unknown API Server Error', { variant: 'error' });
+          return
+        } 
+        if (error.name === 'FetchError'){
+          this.props.enqueueSnackbar(error.code +' error: unable to connect to API endpoint ' + apiInfo.hostname + ':' + apiInfo.port + '. Check API settings.', { variant: 'error' });
+          return;
+        }
+        this.props.enqueueSnackbar(error.message, { variant: 'error' });
     }
 
   render() {

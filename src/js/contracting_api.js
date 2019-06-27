@@ -4,11 +4,15 @@ function apiURL (apiInfo, ENDPOINT){
     if (apiInfo) { return apiInfo.hostname + ':' + apiInfo.port + ENDPOINT;}     
 }
 
-export function apicheck(){
+export function apicheck(hostname){
     const ENDPOINT = '/';
+    let URL = hostname + ENDPOINT
+    if (hostname === undefined){
+        URL = apiURL(LShelpers.getApiInfo(), ENDPOINT)
+    }
     
     return new Promise (function(resolve, reject){
-        fetch(apiURL(LShelpers.getApiInfo(), ENDPOINT))
+        fetch(URL)
         .then(response => resolve (response.text()))
         .catch((error) => {
             reject(error);

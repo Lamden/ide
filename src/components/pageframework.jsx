@@ -196,22 +196,27 @@ function PageFramework(props) {
     setApiStatus('Connecting...');
     API.apicheck()
       .then(data => data === 'indeed' ? setApiStatus('Online') : setApiStatus('Offline'))
-      .catch(e => handleApiError(e));
+      .catch(err => handleApiError(err));
   }
 
   function handleApiError(error) {
+    console.log(error.name)
+
     setApiStatus('Offline')
+        
     const apiInfo = LShelpers.getApiInfo();
     
       if (!error){
         props.enqueueSnackbar('Unknown API Server Error', { variant: 'error' });
         return
       } 
-      if (error.message === 'Failed to fetch'){
-        props.enqueueSnackbar('Unable to connect to API endpoint ' + apiInfo.hostname + ':' + apiInfo.port + '. Check API settings.', { variant: 'error' });
+      
+      if (error.name === 'FetchError' || error.message === 'Failed to fetch'){
+        props.enqueueSnackbar(error.message + '. Check API settings.', { variant: 'error' });
         return;
       }
-      props.enqueueSnackbar(error, { variant: 'error' });
+      props.enqueueSnackbar(error.message, { variant: 'error' });
+      
   }
 
   return (

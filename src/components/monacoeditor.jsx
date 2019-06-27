@@ -128,16 +128,32 @@ class MonacoWindow extends Component {
       case "Lint":
         this.props.enqueueSnackbar('Checking contract for errors...', { variant: 'info' });
         API.lint('testName', this.getEditorValue())
-          .then(data => this.handleErrors(data));
+          .then(data => this.handleErrors(data))
+          .catch(err => this.handleApiError(err));
         break;
       case "Submit":
         this.props.enqueueSnackbar('Attempting to submit contract...', { variant: 'info' });
         API.submit_contract(this.state.currentTab.name, this.getEditorValue())
-          .then(data => this.handleErrors(data));
+          .then(data => this.handleErrors(data))
+          .catch(err => this.handleApiError(err));
         break;
       default:
         break;
     }
+  }
+
+  handleApiError = (error) => {
+    const apiInfo = LShelpers.getApiInfo();
+    
+      if (!error){
+        this.props.enqueueSnackbar('Unknown API Server Error', { variant: 'error' });
+        return
+      } 
+      if (error.name === 'FetchError'){
+        this.props.enqueueSnackbar(error.code +' error: unable to connect to API endpoint ' + apiInfo.hostname + ':' + apiInfo.port + '. Check API settings.', { variant: 'error' });
+        return;
+      }
+      this.props.enqueueSnackbar(error.message, { variant: 'error' });
   }
 
   recoverTabs = () => {
@@ -153,7 +169,7 @@ class MonacoWindow extends Component {
     for (const [key, value] of LsFiles.database.entries()) {
       API.contract(key)
       .then(data => this.createNewTab(data.name, data.code, 'database'))
-      .catch(e => console.log(e));
+      .catch(err => this.handleApiError(err));
     } 
   }
 
