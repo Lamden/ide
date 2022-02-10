@@ -19,7 +19,7 @@
     "gatsby-source-filesystem": "^2.0.33",
     "gatsby-transformer-sharp": "^2.1.19",
     "monaco-editor-webpack-plugin": "^1.7.0",
-    "node-sass": "^4.12.0",
+    "node-sass": "^7.0.0",
     "notistack": "^0.8.2",
     "prop-types": "^15.7.2",
     "react": "^16.8.6",
